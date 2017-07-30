@@ -1,4 +1,3 @@
-#import seaborn as sns;sns.set_style('darkgrid')
 from angles import r2arcs
 import sys, os, matplotlib
 import lsst.afw.cameraGeom as cameraGeom
@@ -17,10 +16,10 @@ if not os.path.exists(repo_abs_path):
 
 
 import numpy as np
-matplotlib.use("agg")
+matplotlib.use("pdf")
 import matplotlib.pyplot as plt
 import lsst.daf.persistence,  galsim
-
+import seaborn as sns;sns.set_style('darkgrid')
 
 # Create a data butler which provides access to a data repository.
 butler = lsst.daf.persistence.Butler(repo_abs_path)
@@ -104,9 +103,9 @@ Q = plt.quiver(pixel_scale*(old_X-np.median(old_X)),pixel_scale*(old_Y-np.median
 qk = plt.quiverkey(Q, 0.9, 0.9, 0.05, r'$|e|=0.05$', labelpos='E',
                    coordinates='figure')
 plt.title("whisker plot")
-plt.colorbar(cmap='tab20b',label='FWHM')
+plt.colorbar(label='FWHM')
 #plt.axis('equal')
 plt.xlabel('arcsec')
 plt.ylabel('arcsec')
-plt.savefig("/global/homes/h/husni/whisker.png")
+plt.savefig("/global/homes/h/husni/lsstpsf/whisker.pdf")
 plt.close()
