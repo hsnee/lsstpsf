@@ -50,8 +50,8 @@ for ccd in range(104):
     ny = int(nx * (height/width))
     angles = np.zeros((ny,nx))
     X,Y,U,C = (np.zeros((ny,nx)) for _ in range(4))
-    for i,x in enumerate(np.linspace(0, width, nx-1)):
-        for j,y in enumerate(np.linspace(0, height, ny-1)):
+    for i,x in enumerate(np.linspace(0, width, nx)):
+        for j,y in enumerate(np.linspace(0, height, ny)):
             point = Point2D(x,y)
             image = psf.computeKernelImage(point)
             array = image.getArray()
