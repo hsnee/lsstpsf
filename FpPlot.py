@@ -1,6 +1,6 @@
 from angles import r2arcs, r2d
 import sys, os, matplotlib
-import lsst.afw.geom.Point2D as Point2D
+from lsst.afw.geom import Point2D
 
 if len(sys.argv)<2:
     sys.stderr.write("Syntax: python test-psf.py  repo_path\n")
@@ -28,7 +28,7 @@ ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetE
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(104):
     if ccd ==1:
-        old_X, Old_Y, old_U, old_C, old_angles = X, Y, U, C, angles
+        old_X, old_Y, old_U, old_C, old_angles = X, Y, U, C, angles
     if ccd==0:
         pass
     else:
@@ -69,7 +69,7 @@ for ccd in range(104):
             C[j,i] = shape_data.moments_sigma
             if C[j,i]<0:
                 print 'negative size detected :/'
-            angles[j,i] = angles.r2d(0.5*np.arctan2(e2,e1))
+            angles[j,i] = r2d(0.5*np.arctan2(e2,e1))
     if ccd == 0:
         pass
     else:
