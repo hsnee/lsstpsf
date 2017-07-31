@@ -1,6 +1,6 @@
 from angles import r2d
 import sys, os, matplotlib, lsst.daf.persistence,  galsim
-import numpy as npgit
+import numpy as np
 from lsst.afw.geom import Point2D
 
 if len(sys.argv)<2:
