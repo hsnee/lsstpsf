@@ -27,7 +27,7 @@ ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetE
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(104):
     if ccd ==1:
-        old_X, old_Y, old_g1, old_g2, old_angles = X, Y, g1, g2
+        old_X, old_Y, old_g1, old_g2 = X, Y, g1, g2
     visit, ccd = ccd_exposures[ccd]
     calexp = butler.get("calexp", visit=visit, ccd=ccd, immediate=True)
     detector = calexp.getDetector()
