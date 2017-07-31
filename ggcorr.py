@@ -1,4 +1,4 @@
-from angles import r2arcs, r2d
+from angles import r2d
 import sys, os, matplotlib, lsst.daf.persistence,  galsim
 import numpy as np
 from lsst.afw.geom import Point2D
@@ -63,7 +63,7 @@ dec = old_Y.copy()
 g1 = old_g1.copy()
 g2 = old_g2.copy()
 cat = treecorr.Catalog(g1=g1, g2=g2, ra=ra, dec=dec,ra_units='radians',dec_units='radians')
-gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=50, sep_units='arcmin')
+gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=40, sep_units='arcmin')
 gg.process(cat)
 xip = gg.xip
 xim = gg.xim
@@ -71,8 +71,8 @@ xim = gg.xim
 # plot the correlation functions:
 plt.figure()
 r = np.exp(gg.meanlogr)
-plt.plot(r,xip,label=r'$\xi_p$')
-plt.plot(r,xim,label=r'$\xi_m$')
+plt.plot(r,xip,label=r'$\xi_+$')
+plt.plot(r,xim,label=r'$\xi_-$')
 plt.xscale('log')
 plt.yscale('log',nonposy='clip')
 plt.legend()
