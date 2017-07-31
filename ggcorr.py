@@ -1,6 +1,6 @@
 from angles import r2d
 import sys, os, matplotlib, lsst.daf.persistence,  galsim
-import numpy as np
+import numpy as npgit
 from lsst.afw.geom import Point2D
 
 if len(sys.argv)<2:
@@ -77,6 +77,6 @@ plt.plot(r,xip,label=r'$\xi_+$')
 plt.plot(r,xim,label=r'$\xi_-$')
 plt.xscale('log')
 plt.yscale('log')
-plt.legend(bbox_to_anchor=(0.9, 1), loc='upper right', borderaxespad=0.)
+plt.legend(bbox_to_anchor=(0.95, 1), loc='upper right', borderaxespad=0.)
 plt.savefig('GGCorrelation.pdf')
 plt.close()
