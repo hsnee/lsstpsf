@@ -62,7 +62,7 @@ ra = old_X.copy()
 dec = old_Y.copy()
 g1 = old_g1.copy()
 g2 = old_g2.copy()
-cat = treecorr.Catalog(g1=g1, g2=g2, ra=ra, dec=dec)
+cat = treecorr.Catalog(g1=g1, g2=g2, ra=ra, dec=dec,ra_units='radians',dec_units='radians')
 gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=50, sep_units='arcmin')
 gg.process(cat)
 xip = gg.xip
