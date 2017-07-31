@@ -33,7 +33,7 @@ for ccd in range(104):
     detector = calexp.getDetector()
     print 'visit', visit, 'ccd', ccd, detector.getName()
     width, height, psf, wcs = calexp.getWidth(), calexp.getHeight(), calexp.getPsf(), calexp.getWcs()
-    nx = 5
+    nx = 20
     ny = int(nx * (height/width))
     X,Y,g1,g2 = (np.zeros((ny,nx)) for _ in range(4))
     for i,x in enumerate(np.linspace(0, width, nx)):
@@ -74,7 +74,7 @@ r = np.exp(gg.meanlogr)
 plt.plot(r,xip,label=r'$\xi_p$')
 plt.plot(r,xim,label=r'$\xi_m$')
 plt.xscale('log')
-plt.yscale('log',nonposy=clip)
+plt.yscale('log',nonposy='clip')
 plt.legend()
 plt.savefig('GGCorrelation.pdf')
 plt.close()
