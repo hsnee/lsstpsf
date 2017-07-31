@@ -70,7 +70,7 @@ xim = gg.xim
 
 # plot the correlation functions:
 plt.figure()
-r = numpy.exp(gg.meanlogr)
+r = np.exp(gg.meanlogr)
 plt.plot(r,xip,label=r'$\xi_p$')
 plt.plot(r,xim,label=r'$\xi_m$')
 plt.xscale('log')
