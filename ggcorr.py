@@ -71,6 +71,8 @@ xim = gg.xim
 # plot the correlation functions:
 plt.figure()
 r = np.exp(gg.meanlogr)
+plt.xlabel(r'$\theta$ (arcmin)')
+plt.ylabel(r'$\xi$')
 plt.plot(r,xip,label=r'$\xi_+$')
 plt.plot(r,xim,label=r'$\xi_-$')
 plt.xscale('log')
