@@ -1,0 +1,10 @@
+_build/*
+DarwinX86/*
+eups/*
+EuåsBuildDir/*
+site/*
+ups_db/*
+eupsbuild.log
+loadLSST.*
+newinstall.sh
+Untitled.ipynb
