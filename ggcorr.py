@@ -2,6 +2,9 @@ from angles import r2d
 import sys, os, matplotlib, lsst.daf.persistence,  galsim
 import numpy as np
 from lsst.afw.geom import Point2D
+matplotlib.use("pdf")
+import matplotlib.pyplot as plt
+import seaborn as sns;sns.set_style('darkgrid')
 
 if len(sys.argv)<2:
     sys.stderr.write("Syntax: python test-psf.py  repo_path\n")
@@ -14,10 +17,6 @@ if not os.path.exists(repo_abs_path):
     sys.stderr.write("Nothing found at {}\n".format(repo_abs_path))
     exit()
 
-matplotlib.use("pdf")
-import matplotlib.pyplot as plt
-import seaborn as sns;sns.set_style('darkgrid')
-
 # Create a data butler which provides access to a data repository.
 butler = lsst.daf.persistence.Butler(repo_abs_path)
 print "Butler summoned (i.e. we have loaded the data repository)", repo_abs_path
@@ -25,8 +24,8 @@ ccd_exposures = butler.queryMetadata("calexp", format=['visit', 'ccd'])
 ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetExists("calexp", visit=visit, ccd=ccd)]
 
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
-for ccd in range(104):
-    if ccd ==1:
+for ccd in range(visitnum*112,104+visitnum*112):
+    if ccd ==1+visitnum*112:
         old_X, old_Y, old_g1, old_g2 = X, Y, g1, g2
     visit, ccd = ccd_exposures[ccd]
     calexp = butler.get("calexp", visit=visit, ccd=ccd, immediate=True)
@@ -50,7 +49,7 @@ for ccd in range(104):
             FpPos = wcs.pixelToSky(point)
             X[j,i], Y[j,i] = FpPos.getLongitude(), FpPos.getLatitude()
             g1[j,i], g2[j,i] = shape_data.observed_shape.g1, shape_data.observed_shape.g2
-    if ccd == 0:
+    if ccd == 0+visitnum*112:
         pass
     else:
         old_X, old_Y, old_g1, old_g2 = np.append(X,old_X), np.append(Y,old_Y), np.append(g1,old_g1), np.append(g2,old_g2)
