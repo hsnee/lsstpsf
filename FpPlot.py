@@ -28,7 +28,7 @@ ccd_exposures = butler.queryMetadata("calexp", format=['visit', 'ccd'])
 ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetExists("calexp", visit=visit, ccd=ccd)]
 
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
-for ccd in range(104):
+for ccd in range(visitnum*112,visitnum*112+104):
     if ccd ==1+112*visitnum:
         old_X, old_Y, old_U, old_C, old_angles = X, Y, U, C, angles
     visit, ccd = ccd_exposures[ccd]
