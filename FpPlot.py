@@ -2,8 +2,8 @@ from angles import r2arcs, r2d
 import sys, os, matplotlib
 from lsst.afw.geom import Point2D
 
-if len(sys.argv)<2:
-    sys.stderr.write("Syntax: python test-psf.py  repo_path\n")
+if len(sys.argv)<3:
+    sys.stderr.write("Syntax: python test-psf.py  repo_path visitnum\n")
     exit()
 
 repo_rel_path = sys.argv[1]
@@ -12,6 +12,8 @@ repo_abs_path = os.path.abspath(repo_rel_path)
 if not os.path.exists(repo_abs_path):
     sys.stderr.write("Nothing found at {}\n".format(repo_abs_path))
     exit()
+visitnum = sys.argv[2]
+visitnum = int(visitnum)
 
 import numpy as np
 matplotlib.use("pdf")
@@ -42,7 +44,7 @@ for ccd in range(104):
 
     # pixel_scale = wcs.pixelScale() # if using pixel coordinates.
     pixel_scale = 1. # if using FOCAL_PLANE coordinates
-    if ccd==0:
+    if ccd==0+112*visitnum:
         pass
     else:
         np.testing.assert_approx_equal(old_pixel_scale, pixel_scale, significant=5, err_msg='pixel scale is different!!')
@@ -88,5 +90,5 @@ plt.colorbar(label='FWHM')
 #plt.axis('equal')
 plt.xlabel('arcsec')
 plt.ylabel('arcsec')
-plt.savefig("/global/homes/h/husni/lsstpsf/whisker.pdf")
+plt.savefig(str(visitnum)+"whisker.pdf")
 plt.close()
