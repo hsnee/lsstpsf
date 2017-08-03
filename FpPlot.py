@@ -29,7 +29,7 @@ ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetE
 
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(104):
-    if ccd ==1:
+    if ccd ==1+112*visitnum:
         old_X, old_Y, old_U, old_C, old_angles = X, Y, U, C, angles
     if ccd==0:
         pass
@@ -44,10 +44,6 @@ for ccd in range(104):
 
     # pixel_scale = wcs.pixelScale() # if using pixel coordinates.
     pixel_scale = 1. # if using FOCAL_PLANE coordinates
-    if ccd==0+112*visitnum:
-        pass
-    else:
-        np.testing.assert_approx_equal(old_pixel_scale, pixel_scale, significant=5, err_msg='pixel scale is different!!')
     nx = 5
     ny = int(nx * (height/width))
     angles = np.zeros((ny,nx))
