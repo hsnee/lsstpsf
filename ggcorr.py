@@ -6,8 +6,8 @@ matplotlib.use("pdf")
 import matplotlib.pyplot as plt
 import seaborn as sns;sns.set_style('darkgrid')
 
-if len(sys.argv)<2:
-    sys.stderr.write("Syntax: python test-psf.py  repo_path\n")
+if len(sys.argv)<3:
+    sys.stderr.write("Syntax: python test-psf.py  repo_path visitnum\n")
     exit()
 
 repo_rel_path = sys.argv[1]
