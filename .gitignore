@@ -8,3 +8,6 @@ eupsbuild.log
 loadLSST.*
 newinstall.sh
 Untitled.ipynb
+.ipynb_checkpoints/*
+.sconf_temp/*
+.sconsign.dblite
