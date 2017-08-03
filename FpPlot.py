@@ -31,10 +31,6 @@ print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(104):
     if ccd ==1+112*visitnum:
         old_X, old_Y, old_U, old_C, old_angles = X, Y, U, C, angles
-    if ccd==0:
-        pass
-    else:
-        old_pixel_scale = pixel_scale
     visit, ccd = ccd_exposures[ccd]
     print 'visit', visit, 'ccd', ccd
     calexp = butler.get("calexp", visit=visit, ccd=ccd, immediate=True)
