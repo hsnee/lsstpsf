@@ -69,7 +69,8 @@ gg.process(cat)
 xip = gg.xip
 xim = gg.xim
 sigma = gg.varxi**0.5
-print gg.varxi
+for i in range(len(sigma)):
+    print xip, xim, sigma
 # plot the correlation functions:
 import seaborn.timeseries
 
