@@ -68,8 +68,8 @@ import treecorr
 del X,Y,g1,g2
 ra = old_X.copy()
 dec = old_Y.copy()
-old_g1 = old_g1.copy()
-old_g2 = old_g2.copy()
+g1 = old_g1.copy()
+g2 = old_g2.copy()
 cat = treecorr.Catalog(g1=g1, g2=g2, ra=ra, dec=dec,ra_units='radians',dec_units='radians')
 gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=40, sep_units='arcmin')
 gg.process(cat)
