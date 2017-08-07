@@ -79,15 +79,12 @@ def _plot_std_bars(std=None, central_data=None, ci=None, data=None,*args, **kwar
     kwargs.update({"central_data": central_data, "ci": ci, "data": data})
     seaborn.timeseries._plot_ci_band(*args, **kwargs)
 seaborn.timeseries._plot_std_bars = _plot_std_bars
-
+r = np.exp(gg.meanlogr)
 plt.figure()
 sns.tsplot(xip,r,err_style='std_bars',label=r'$\xi_+$')
 sns.tsplot(xim,r,err_style='std_bars',label=r'$\xi_-$')
-r = np.exp(gg.meanlogr)
 plt.xlabel(r'$\theta$ (arcmin)')
 plt.ylabel(r'$\xi$')
-plt.plot(r,xip,label=r'$\xi_+$')
-plt.plot(r,xim,label=r'$\xi_-$')
 plt.xscale('log')
 plt.yscale('log')
 plt.legend(bbox_to_anchor=(0.98, 1), loc='upper right', borderaxespad=0.)
