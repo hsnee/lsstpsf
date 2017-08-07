@@ -78,7 +78,7 @@ def _plot_std_bars(std=None, central_data=None, ci=None, data=None,*args, **kwar
     std = sigma
     ci = np.asarray((central_data - std, central_data + std))
     kwargs.update({"central_data": central_data, "ci": ci, "data": data})
-    seaborn.timeseries._plot_ci_band(*args, **kwargs)
+    seaborn.timeseries._plot_ci_bars(*args, **kwargs)
 seaborn.timeseries._plot_std_bars = _plot_std_bars
 r = np.exp(gg.meanlogr)
 plt.figure()
