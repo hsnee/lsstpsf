@@ -68,9 +68,21 @@ gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=40, sep_units='arcmin'
 gg.process(cat)
 xip = gg.xip
 xim = gg.xim
+sigma = gg.varxi**0.5
 
 # plot the correlation functions:
+import seaborn.timeseries
+
+def _plot_std_bars(std=None, central_data=None, ci=None, data=None,*args, **kwargs):
+    std = sigma
+    ci = np.asarray((central_data - std, central_data + std))
+    kwargs.update({"central_data": central_data, "ci": ci, "data": data})
+    seaborn.timeseries._plot_ci_band(*args, **kwargs)
+seaborn.timeseries._plot_std_bars = _plot_std_bars
+
 plt.figure()
+sns.tsplot(xip,r,err_style='std_bars',label=r'$\xi_+$')
+sns.tsplot(xim,r,err_style='std_bars',label=r'$\xi_-$')
 r = np.exp(gg.meanlogr)
 plt.xlabel(r'$\theta$ (arcmin)')
 plt.ylabel(r'$\xi$')
