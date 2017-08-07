@@ -60,9 +60,8 @@ ll = len(old_g1)
 g1mean = np.mean(old_g1)
 g2mean = np.mean(old_g2)
 del old_g1, old_g2
-old_g1 = ll*g1mean
-old_g2 = ll*g2mean
-
+old_g1 = np.ones(ll)*g1mean
+old_g2 = np.ones(ll)*g2mean
 # Now instead of plotting things let's input them into treecorr and get a gamma-gamma correlation function.
 import treecorr
 del X,Y,g1,g2
