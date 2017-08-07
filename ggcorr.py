@@ -26,7 +26,6 @@ ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetE
 
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(visitnum*112,104+visitnum*112):
-    print ccd
     if ccd ==1+visitnum*112:
         old_X, old_Y, old_g1, old_g2 = X, Y, g1, g2
     visit, ccd = ccd_exposures[ccd]
@@ -69,8 +68,7 @@ gg.process(cat)
 xip = gg.xip
 xim = gg.xim
 sigma = gg.varxi**0.5
-for i in range(len(sigma)):
-    print xip, xim, sigma
+
 # plot the correlation functions:
 import seaborn.timeseries
 
