@@ -4,9 +4,9 @@ import seaborn as sns;sns.set_style('darkgrid')
 
 x = np.linspace(-50,50,101)
 y = np.linspace(-50,50,101)
-X, Y = meshgrid(x, y)
-ra = np.flatten(X)
-dec = np.flatten(Y)
+X, Y = np.meshgrid(x, y)
+ra = X.flatten()
+dec = Y.flatten()
 g1 = X
 g2 = Y
 
@@ -38,5 +38,5 @@ plt.ylabel(r'$\xi$')
 plt.xscale('log')
 plt.yscale('log')
 plt.legend([r'$\xi_+$',r'$\xi_-$'],bbox_to_anchor=(0.98, 1), loc='upper right', borderaxespad=0.)
-plt.savefig(str(visitnum)+'diverging_test_higher.pdf')
+plt.savefig('diverging_test_higher.pdf')
 plt.close()
