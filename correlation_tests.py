@@ -1,8 +1,4 @@
-from angles import r2d
-import sys, os, matplotlib, lsst.daf.persistence,  galsim
 import numpy as np
-from lsst.afw.geom import Point2D
-matplotlib.use("pdf")
 import matplotlib.pyplot as plt
 import seaborn as sns;sns.set_style('darkgrid')
 
