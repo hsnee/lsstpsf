@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns;sns.set_style('darkgrid')
 
-x = np.linspace(-50,50,101)
-y = np.linspace(-50,50,101)
+x = np.linspace(-3,3,1001)
+y = np.linspace(-3,3,1001)
 X, Y = np.meshgrid(x, y)
 ra = X.flatten()
 dec = Y.flatten()
-g1 = X
-g2 = Y
+g1 = ra
+g2 = dec
 
 # Now instead of plotting things let's input them into treecorr and get a gamma-gamma correlation function.
 import treecorr
@@ -40,3 +40,6 @@ plt.yscale('log')
 plt.legend([r'$\xi_+$',r'$\xi_-$'],bbox_to_anchor=(0.98, 1), loc='upper right', borderaxespad=0.)
 plt.savefig('diverging_test_higher.pdf')
 plt.close()
+
+for i in range(len(ra)):
+    print ra[i],dec[i],g1[i],g2[i]
