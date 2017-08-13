@@ -64,4 +64,4 @@ g1 = old_g1.copy()
 g2 = old_g2.copy()
 
 # now save the information in a file.
-np.savetxt('corr_arrays.txt',(ra,dec,g1,g2))
+np.savetxt(str(visitnum)+' corr_arrays.txt',(ra,dec,g1,g2))
