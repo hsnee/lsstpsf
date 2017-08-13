@@ -2,18 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns;sns.set_style('darkgrid')
 
-x = np.linspace(-3,3,1001)
-y = np.linspace(-3,3,1001)
-X, Y = np.meshgrid(x, y)
-ra = X.flatten()
-dec = Y.flatten()
-g1 = ra
-g2 = dec
+data0 = np.loadtxt('0\ corr_arrays.txt')
+data1 = np.loadtxt('1\ corr_arrays.txt')
+data2 = np.loadtxt('2\ corr_arrays.txt')
+ra0,dec0,g10,g20 = data0[0],data0[1],data0[2],data0[3]
+ra1,dec1,g11,g21 = data1[0],data1[1],data1[2],data1[3]
+ra2,dec2,g12,g22 = data2[0],data2[1],data2[2],data2[3]
 
 # Now instead of plotting things let's input them into treecorr and get a gamma-gamma correlation function.
 import treecorr
 
-cat = treecorr.Catalog(g1=g1, g2=g2, ra=ra, dec=dec,ra_units='radians',dec_units='radians')
+cat = treecorr.Catalog(g1=g11-g10, g2=g21-g20, ra=ra1, dec=dec1,ra_units='radians',dec_units='radians')
 gg = treecorr.GGCorrelation(min_sep=1, max_sep=200, nbins=40, sep_units='arcmin')
 gg.process(cat)
 xip = gg.xip
@@ -37,9 +36,6 @@ plt.xlabel(r'$\theta$ (arcmin)')
 plt.ylabel(r'$\xi$')
 plt.xscale('log')
 plt.yscale('log')
-plt.legend([r'$\xi_+$',r'$\xi_-$'],bbox_to_anchor=(0.98, 1), loc='upper right', borderaxespad=0.)
-plt.savefig('diverging_test_higher.pdf')
+plt.legend([r'$\xi_+$',r'$\xi_-$'],bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0.)
+plt.savefig('delta_shear.pdf')
 plt.close()
-
-for i in range(len(ra)):
-    print ra[i],dec[i],g1[i],g2[i]
