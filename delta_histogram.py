@@ -18,8 +18,8 @@ delta_g2 = g21-g20
 # Now make a histogram
 
 plt.figure()
-plt.histogram(delta_g1,label=r'$\frac{\detla g_1}{<g1>}$')
-plt.histogram(delta_g2,label=r'$\frac{\delta g_2$}{<g2>}')
+plt.hist(delta_g1,label=r'$\frac{\detla g_1}{<g1>}$')
+plt.hist(delta_g2,label=r'$\frac{\delta g_2$}{<g2>}')
 plt.xlabel('g')
 #plt.ylabel(r'$\xi$')
 plt.xscale('log')
