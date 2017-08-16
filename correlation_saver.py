@@ -56,8 +56,8 @@ for ccd in range(visitnum*112,104+visitnum*112):
     else:
         old_X, old_Y, old_g1, old_g2, old_size = np.append(X,old_X), np.append(Y,old_Y), np.append(g1,old_g1), np.append(g2,old_g2), np.append(size,old_size)
 
-# Now instead of plotting things let's input them into treecorr and get a gamma-gamma correlation function.
-import treecorr
+# Now save these to a txt file:
+
 del X,Y,g1,g2
 ra = old_X.copy()
 dec = old_Y.copy()
