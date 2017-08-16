@@ -27,7 +27,7 @@ ccd_exposures = [(visit,ccd) for (visit,ccd) in ccd_exposures if butler.datasetE
 print "Found {} (exposure,ccd) pairs".format(len(ccd_exposures))
 for ccd in range(visitnum*112,104+visitnum*112):
     if ccd ==1+visitnum*112:
-        old_X, old_Y, old_g1, old_g2 = X, Y, g1, g2
+        old_X, old_Y, old_g1, old_g2, old_size = X, Y, g1, g2, size
     visit, ccd = ccd_exposures[ccd]
     calexp = butler.get("calexp", visit=visit, ccd=ccd, immediate=True)
     detector = calexp.getDetector()
@@ -35,7 +35,7 @@ for ccd in range(visitnum*112,104+visitnum*112):
     width, height, psf, wcs = calexp.getWidth(), calexp.getHeight(), calexp.getPsf(), calexp.getWcs()
     nx = 20
     ny = int(nx * (height/width))
-    X,Y,g1,g2 = (np.zeros((ny,nx)) for _ in range(4))
+    X,Y,g1,g2,size = (np.zeros((ny,nx)) for _ in range(4))
     for i,x in enumerate(np.linspace(0, width, nx)):
         for j,y in enumerate(np.linspace(0, height, ny)):
             point = Point2D(x,y)
@@ -50,10 +50,11 @@ for ccd in range(visitnum*112,104+visitnum*112):
             FpPos = wcs.pixelToSky(point)
             X[j,i], Y[j,i] = FpPos.getLongitude(), FpPos.getLatitude()
             g1[j,i], g2[j,i] = shape_data.observed_shape.g1, shape_data.observed_shape.g2
+            size[j,i] = shape_data.moments_sigma
     if ccd == 0:
         pass
     else:
-        old_X, old_Y, old_g1, old_g2 = np.append(X,old_X), np.append(Y,old_Y), np.append(g1,old_g1), np.append(g2,old_g2)
+        old_X, old_Y, old_g1, old_g2, old_size = np.append(X,old_X), np.append(Y,old_Y), np.append(g1,old_g1), np.append(g2,old_g2), np.append(size,old_size)
 
 # Now instead of plotting things let's input them into treecorr and get a gamma-gamma correlation function.
 import treecorr
@@ -62,6 +63,7 @@ ra = old_X.copy()
 dec = old_Y.copy()
 g1 = old_g1.copy()
 g2 = old_g2.copy()
+size = old_size.copy()
 
 # now save the information in a file.
-np.savetxt(str(visitnum)+' corr_arrays.txt',(ra,dec,g1,g2))
+np.savetxt(str(visitnum)+' corr_arrays.txt',(ra,dec,g1,g2,size))
