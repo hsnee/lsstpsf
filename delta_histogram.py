@@ -18,12 +18,12 @@ delta_g2 = g21-g20
 # Now make a histogram
 
 plt.figure()
-plt.hist(delta_g1,label=r'$\frac{\detla g_1}{<g1>}$')
-plt.hist(delta_g2,label=r'$\frac{\delta g_2$}{<g2>}')
+plt.hist(delta_g1,label=r'$\frac{\delta g_1}{<g1>}$')
+plt.hist(delta_g2,label=r'$\frac{\delta g_2}{<g2>}$',alpha=0.5)
 plt.xlabel('g')
 #plt.ylabel(r'$\xi$')
 plt.xscale('log')
 plt.yscale('log')
-plt.legend([r'$\xi_+$',r'$\xi_-$'],bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0.)
+plt.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0.)
 plt.savefig('fractional_delta_shear_histogram.pdf')
 plt.close()
