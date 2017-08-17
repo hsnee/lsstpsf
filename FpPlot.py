@@ -1,6 +1,7 @@
 from angles import r2arcs, r2d
 import sys, os, matplotlib
 from lsst.afw.geom import Point2D
+import lsst.afw.cameraGeom as cameraGeom
 
 if len(sys.argv)<3:
     sys.stderr.write("Syntax: python test-psf.py  repo_path visitnum\n")
@@ -35,6 +36,8 @@ for ccd in range(visitnum*112,visitnum*112+104):
     print 'visit', visit, 'ccd', ccd
     calexp = butler.get("calexp", visit=visit, ccd=ccd, immediate=True)
     detector = calexp.getDetector()
+    orientation = detector.getOrientation()
+    quarters = orientation.getNQuarter()
     print detector.getName()
     width, height, psf, wcs = calexp.getWidth(), calexp.getHeight(), calexp.getPsf(), calexp.getWcs()
 
@@ -63,7 +66,7 @@ for ccd in range(visitnum*112,visitnum*112+104):
             C[j,i] = shape_data.moments_sigma
             if C[j,i]<0:
                 print 'negative size detected :/'
-            angles[j,i] = r2d(0.5*np.arctan2(e2,e1))
+            angles[j,i] = r2d(0.5*np.arctan2(e2,e1)) + 90*quarters
     if ccd == 0:
         pass
     else:
