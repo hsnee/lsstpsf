@@ -8,8 +8,8 @@ from angles import r2arcs, r2d
 
 # really diverging
 
-X = np.random.randn(int(1E4))
-Y = np.random.randn(int(1E4))
+X = np.random.randn(int(1E3))
+Y = np.random.randn(int(1E3))
 r = np.sqrt(X**2+Y**2)
 theta = np.arctan(Y/X)
 angles = np.zeros(len(X))
