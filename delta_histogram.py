@@ -16,12 +16,12 @@ delta_size = size1-size0
 # Now make a histogram
 
 plt.figure()
-plt.hist(delta_size/size_avg,label=r'$\frac{\Delta \sigma}{< \sigma >}$')
+plt.hist(delta_size,label=r'$\frac{\Delta \sigma}{< \sigma >}$')
 
 # plt.xlabel(r'\')
 # plt.ylabel(r'$\xi$')
 plt.xscale('log')
 plt.yscale('log')
 plt.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0.)
-plt.savefig('fractional_delta_size_histogram.pdf')
+plt.savefig('delta_size_histogram.pdf')
 plt.close()
