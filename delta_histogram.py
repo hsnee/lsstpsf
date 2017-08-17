@@ -16,7 +16,7 @@ delta_size = size1-size0
 # Now make a histogram
 
 plt.figure()
-plt.hist(delta_g1,label=r'$\frac{\Delta \sigma}{< \sigma >}$')
+plt.hist(delta_size/size_avg,label=r'$\frac{\Delta \sigma}{< \sigma >}$')
 
 # plt.xlabel(r'\')
 # plt.ylabel(r'$\xi$')
