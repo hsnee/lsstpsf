@@ -74,7 +74,8 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     X,Y = np.array(map(lambda x: angles.r2arcs(x-np.median(x)), (X,Y)))
 
     plt.figure(1)
-    plt.pcolormesh(X,Y,e1a-e1b)
+    plt.pcolormesh(X,Y,e1a-e1b,cmap='viridis')
+    plt.colorbar()
     plt.xlabel('arcsec')
     plt.ylabel('arcsec')
     plt.title(r'$\Delta e_1$')
@@ -82,7 +83,8 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     plt.close()
 
     plt.figure(2)
-    plt.pcolormesh(X,Y,e2a-e2b)
+    plt.pcolormesh(X,Y,e2a-e2b,cmap='viridis')
+    plt.colorbar()
     plt.title(r'$\Delta e_2$')
     plt.xlabel('arcsec')
     plt.ylabel('arcsec')
@@ -90,7 +92,8 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     plt.close()
 
     plt.figure(3)
-    plt.pcolormesh(X,Y,(sigmaa-sigmab)/(0.5*(sigmaa+sigmab)))
+    plt.pcolormesh(X,Y,(sigmaa-sigmab)/(0.5*(sigmaa+sigmab)),cmap='viridis')
+    plt.colorbar()
     plt.title(r'$\frac{\sigma_a-\sigma_b}{<\sigma>}$')
     plt.xlabel('arcsec')
     plt.ylabel('arcsec')
