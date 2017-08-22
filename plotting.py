@@ -74,7 +74,7 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     X,Y = X-np.mean(X), Y-np.mean(Y)
     for i in range(len(X)):
         X[i],Y[i] = np.array(map(lambda x: angles.r2arcs(x), (X[i],Y[i])))
-
+    print X,Y,e1a-e1b
     plt.figure(1)
     plt.pcolormesh(X,Y,e1a-e1b,cmap='viridis')
     plt.colorbar()
