@@ -70,11 +70,11 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     matplotlib.use("pdf")
     import numpy as np, matplotlib.pyplot as plt
     import seaborn as sns;sns.set_style('darkgrid')
+    X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab = np.array(map(lambda x:x[1::10],(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab)))
     print 'meshing started'
     X,Y = np.meshgrid(X,Y)
     print 'meshing finished'
     X,Y = X-np.mean(X), Y-np.mean(Y)
-
     for j in range(len(X)):
         for i in range(len(X[0])):
             X[j][i],Y[j][i] = np.array(map(lambda x: angles.r2arcs(x),(X[j][i],Y[j][i])))
