@@ -76,7 +76,7 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     print 'meshing finished'
     X,Y = X-np.mean(X), Y-np.mean(Y)
     X,Y = np.array(map(lambda x: angles.r2arcs(1)*x,(X,Y)))
-    print X,Y,e1a-e1b
+    print shape(X), shape(Y), shape(e1a-e1b)
     plt.figure(1)
     plt.pcolor(X,Y,e1a-e1b,cmap='viridis')
     plt.colorbar()
