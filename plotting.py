@@ -1,4 +1,4 @@
-def sns_time_series(x_tuple,y_tuple,errors=0,two=False, outputname, *args,**kwargs):
+def sns_time_series(x_tuple,y_tuple,outputname,errors=0,two=False, *args,**kwargs):
     """seaborn time series, with error-bands"""
     if (type(outputname)==str)|(type(x_tuple)==tuple)|(type(y_tuple)==tuple):
         pass
