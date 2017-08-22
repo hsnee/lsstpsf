@@ -34,7 +34,7 @@ def sns_time_series(x_tuple,y_tuple,outputname,errors=0,two=False, *args,**kwarg
     plt.close()
 
 
-def whisker_plot(X,Y,U,V=None,C=None, angles, key=(1,False),pixel_scale=1,color_scale=1,units='rad'):
+def whisker_plot(X,Y,U,angles, V=None,C=None, key=(1,False),pixel_scale=1,color_scale=1,units='rad'):
     import angles, matplotlib
     matplotlib.use("pdf")
     import numpy as np, matplotlib.pyplot as plt
