@@ -45,9 +45,9 @@ def whisker_plot(X,Y,U,V=None,C=None, angles, key=(1,False),pixel_scale=1,color_
         V = U.copy()
     if units=='rad':
         pixel_scale,X,Y = np.array(map(lambda x: angles.r2arcs(x),(pixel_scale,X,Y)))
-    elif units=='deg'
+    elif units=='deg':
         pixel_scale,X,Y = np.array(map(lambda x: angles.d2arcs(x),(pixel_scale,X,Y)))
-    elif units=='arcs'
+    elif units=='arcs':
         pass
     else:
         raise ValueError('unknown units')
