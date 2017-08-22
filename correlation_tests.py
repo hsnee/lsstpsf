@@ -15,12 +15,6 @@ data1 = np.loadtxt('1 corr_arrays.txt')
 ra0,dec0,g10,g20,sigma0 = np.array(map(lambda x: data0[x], (0,1,2,3,4)))
 ra1,dec1,g11,g21,sigma1 = np.array(map(lambda x: data1[x], (0,1,2,3,4)))
 
-g1_avg = 0.5*(g10 + g11)
-g2_avg = 0.5*(g20 + g21)
-
-delta_g1 = g11-g10
-delta_g2 = g21-g20
-
 
 if 0:
     # get the g-g correlation function from treecorr
@@ -34,3 +28,4 @@ if 0:
 
 if 1:
     # call a function from the plotting module
+    HSC_plt(ra0,dec0,g10,g20,g11,g21,sigma0,sigma1)
