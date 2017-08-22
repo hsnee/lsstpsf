@@ -71,7 +71,8 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     import numpy as np, matplotlib.pyplot as plt
     import seaborn as sns;sns.set_style('darkgrid')
 
-    X,Y = np.array(map(lambda x: angles.r2arcs(x-np.median(x)), (X,Y)))
+    X,Y = X-np.mean(X), Y-np.mean(Y)
+    X,Y = np.array(map(lambda x: angles.r2arcs(x), (X,Y)))
 
     plt.figure(1)
     plt.pcolormesh(X,Y,e1a-e1b,cmap='viridis')
