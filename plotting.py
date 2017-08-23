@@ -68,8 +68,8 @@ def whisker_plot(X,Y,U,angles, V=None,C=None, key=(1,False),pixel_scale=1,color_
 def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     import angles, matplotlib
     matplotlib.use("pdf")
-    import numpy as np, matplotlib.pyplot as plt
-    import seaborn as sns;sns.set_style('darkgrid')
+    import numpy as np, matplotlib.pyplot as plt, seaborn as sns; sns.set_style('darkgrid')
+
     X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab = np.array(map(lambda x:x[1::5],(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab)))
     print 'meshing started'
     X,Y = np.meshgrid(X,Y)
@@ -78,8 +78,9 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     X,Y = np.array(map(lambda x: angles.r2arcs(1)*x,(X,Y)))
     X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab = np.array(X), np.array(Y), np.array(e1a), np.array(e2a), np.array(e1b), np.array(e2b), np.array(sigmaa), np.array(sigmab)
     print np.size(X), np.size(Y), np.size(e1a)
+
     plt.figure(1)
-    plt.pcolor(X,Y,e1a-e1b,cmap='viridis')
+    plt.scatter(X,Y,c=e1a-e1b,cmap='viridis')
     plt.colorbar()
     plt.xlabel('arcsec')
     plt.ylabel('arcsec')
@@ -88,7 +89,7 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     plt.close()
 
     plt.figure(2)
-    plt.pcolormesh(X,Y,e2a-e2b,cmap='viridis')
+    plt.scatter(X,Y,c=e2a-e2b,cmap='viridis')
     plt.colorbar()
     plt.title(r'$\Delta e_2$')
     plt.xlabel('arcsec')
@@ -97,7 +98,7 @@ def HSC_style_plots(X,Y,e1a,e2a,e1b,e2b,sigmaa,sigmab):
     plt.close()
 
     plt.figure(3)
-    plt.pcolormesh(X,Y,(sigmaa-sigmab)/(0.5*(sigmaa+sigmab)),cmap='viridis')
+    plt.scatter(X,Y,c=(sigmaa-sigmab)/(0.5*(sigmaa+sigmab)),cmap='viridis')
     plt.colorbar()
     plt.title(r'$\frac{\sigma_a-\sigma_b}{<\sigma>}$')
     plt.xlabel('arcsec')
