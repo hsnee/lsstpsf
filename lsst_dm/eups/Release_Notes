@@ -1,0 +1,1329 @@
+2016-03-22 mjuric (2.0.2)
+    - README: correct TravisCI URLs
+    - Work around an issue where the user tags would be forgotten (Issue #93)
+    - Unit/integration test environment enhancements
+    - bugfix: setups.csh now works when DYLD_LIBRARY_PATH is empty
+    - TravisCI CI improvements
+    - bugfix: work around csh cross-platform quirks in testDyldLibraryPath.py
+    - eupspkg: Ignore SCONSFLAGS from the environment (use EUPSPKG_SCONSFLAGS instead)
+
+    dev stats:
+      - 23 files changed, 359 insertions(+), 53 deletions(-)
+      - contributors: Mario Juric, Robert Lupton the Good
+
+2016-01-21 mjuric (2.0.1)
+    - Fixed the breakage caused by the introduction of Python 3.x support
+    - Completed Python 3.5 compatibility changes; EUPS should now be fully 
+      functional under Python 3.5
+    - All unit tests now pass on Python 2.6, 2.7 and 3.5
+    - Fixed a number of bugs revealed by the unit tests
+    - Framework for writing functional tests as scripts
+    - eupspkg: reintroduced the TAP_PACKAGE envvar mistakenly removed 
+      in 1.5.8, and deprecated the .tap_package mechanism
+    - release-new-version.sh learned to autogenerate draft release notes
+
+    dev stats:
+      - 62 files changed, 968 insertions(+), 718 deletions(-)
+      - contributors: Russell Owen, Mario Juric, Miguel de Val-Borro, Tim Jenness
+
+2016-01-09 mjuric (2.0.0)
+    - Update code to support both python 2.6+ and 3.3+ (dropping 2.5 and older).
+      Due to the complexity involved in accomplishing this, this release
+      should be considered EXPERIMENTAL. Please let us know of any issues or
+      bugs. (patchset contributed by Miguel de Val-Borro)
+    - Ensure DYLD_LIBRARY_PATH survives setup/unsetup on OS X 10.11 El Capitan
+    - Rework setups.c?sh scripts to use maximally re-use eups.table file
+
+    bug fixes:
+      - make eupspkg more robust on machines with >= ~24 cores
+      - 'unsetup eups' didn't work under (t)csh
+      - don't depend on cPickle-specific behavion
+      - bin/eups_setup_impl.py.in: move imports so PYTHONPATH recovery works
+      - configure.ac: unescape ${prefix} so it gets expanded
+      - Makefile.in: create $EUPS_PATH after clearing $EUPS_DIR
+      - on non-GNU systems options must come before arguments
+      - cStringIO and io.StringIO are not interchangeable
+      - fix unit tests broken by Python 3 compatibility code
+
+    dev stats:
+      - 60 files changed, 1438 insertions(+), 1285 deletions(-)
+      - 20 commits by Miguel de Val-Borro
+      - 18 commits by Mario Juric
+
+2015-12-24 mjuric (1.5.10)
+      jhoblitt: allow https:// URLs in EUPS_PKGROOT
+      timj: Allow spaces in path names
+      rhl: Use a python2 compatible version of commonpath to replace commonprefix
+           The problem is paths such as "/foo/bar" and "/foo/bar_XXX" for which commonprefix returns "/foo/bar"
+      rhl: Allow user to specify a product name with "eups tags --clone"
+
+2015-05-06 mjuric (1.5.9)
+      rhl: Added "eups tags glob" and made "eups tags" write tags on separate lines when writing to a pipe
+      Python 2.4 compatibility fix
+
+2015-03-30 mjuric (1.5.8)
+      Various improvements and performance optimizations for stacks with
+      tens of thousands of declared products.
+
+2014-11-11 rhl (1.5.7)
+      Multi-tasking failure on my part.  We stopped using a "v" prefix with 1.0.0
+      Otherwise this is identical to v1.5.6 and 1.5.5
+
+2014-11-11 rhl (v1.5.6)
+      Tagged at Frossie's request
+
+2014-11-11 rhl (1.5.5)
+      ignore;  rhl didn't follow release process
+
+2014-10-12 mjuric (v1.5.4)
+      detect_compiler: set $CXX_CXX11_FLAG to the flag that enables C++11
+
+2014-10-10 rhl (v1.5.3)
+      Prevent setups.* overriding EUPS_DIR
+
+      Make setups.sh posix compliant (e.g. ksh, zsh, dash)
+
+2014-10-04 mjuric (v1.5.2)
+      Support expanding environment variables when productDir is specified in a table file
+      Avoid hang in pkgautoversion on OS X
+
+2014-08-18 mjuric (v1.5.1)
+      Add a script to correctly cut new EUPS releases (release-new-version.sh)
+
+      Other feature additions and fixes (see git log for details)
+
+2014-04-24 rhl
+      Renamed "newest" tag to "latest".  Maybe it's just an Real English thing, but "newest" just
+      sounds wrong.
+
+2014-04-21 rhl
+      Made a vro of "version!" (not version) in a setup{Optional,Required} statement ignore --keep
+      (see change on 2014-04-02).
+
+
+      Motivation:  it's useful to set an absolute version even when you want
+      to keep already setup products.  The absolute path specification is also useful,
+      so here's a way to support the latter.  E.g.
+         setupRequired(hscPipe --vro version 2.10.0b_hsc)
+         setupRequired(astrometry_net_data --vro version! sdss-dr8)
+
+2014-04-21 rhl
+      Ignore "-t newest" tags in ~/.eups unless that's the only version available
+
+2014-04-21 rhl
+      Make "eups unsetup" cleanup all eups shell variables
+
+2014-04-21 rhl
+      Support e.g. eups declare -t XXX -r DDD PROD VERSION
+
+      In general, if we are changing a definition and also declaring a tag, generate
+      a tag:XXX version with the changed attributes
+
+2014-04-04 rhl
+      Added unsetup{Required|Optional} to table files.
+
+      An example is the LSST processing stack, where setup algorithms are run and a top-level
+      product sets up a default set.  If want to disable some it's convenient to unsetup them up
+      in your own product (using unsetupOptional(ALG -j))
+
+2014-04-03 rhl
+      Interpret -r DIR in a tableFile as $PRODUCT_DIR/DIR if DIR isn't an absolute path
+
+2014-04-02 rhl
+      Made a vro of "version" in a setup{Optional,Required} statement ignore --keep
+      (but generate a warning unless --quiet)
+
+      Motivation: when setting an absolute version in a table file irrespective of tags e.g.
+           setupRequired(astrometry_net_data --vro version sdss-dr8)
+      setting up --keep failed to setup sdss-dr8 if a version was already setup.
+
+2014-03-31 rhl
+      Always obey --keep while processing setup{Requested,Optional} statements (i.e. fixed
+      bug where specifying tags disabled --keep)
+
+2014-03-29 rhl
+      Added command
+      	    eups tags --clone OLD NEW
+      to assign tag NEW to all products tagged OLD
+
+      Added command
+      	    eups tags --delete XXX
+      to delete tag XXX from all tagged products
+
+2014-03-07 mjuric (v1.3.0)
+      Stabilized the eupspkg distribution mechanism and API. See eups.distrib.eupspkg
+      module docstring for details
+
+2014-02-26 rhl
+       Stop "setup --keep --verbose" from printing the products that are being kept
+
+       They are still printed at verbosity >= 2
+
+2014-01-16 rhl
+      Added etc/eups.el to syntax-colour table files in emacs
+
+2014-01-16 rhl
+      Remove eups_expandbuild eups_remove eups_uses (use e.g. "eups remove" instead)
+
+2014-01-14 Fabrice Jammes
+      Select python interpreter at configure time
+
+2014-01-09 rhl
+      Added "eups admin show" command (only "... show python" is currently implemented)
+
+2014-01-01 mjuric
+      Added new distribution type, eupspkg.  Supercedes build, and can be used to replace tarball too
+      N.b.  pacman is deprecated and unsupported, as is the lsst-specific .bld system
+
+2014-01-01 rhl
+      Add ability to NOT reinstall a product even with eups distrib install --force
+
+      This is done via an entry in manifest.remap:
+      product[:version]  noReinstall
+      and is useful if you have local declarations of e.g. python
+
+2013-07-16 rhl
+       Added "eups distrib path" and deprecated "eups pkgroot"
+
+2013-02-13 rhl
+       Support
+           hooks.config.Eups.defaultTags = dict(pre=["XXX", "YYY"], post=["ZZZ"])
+       in startup.py to specify that setup, with no tags, is equivalent to
+           setup -t XXX,YYY -T ZZZ
+
+       N.b. you can disable this with setup -t None (or setup -t "")
+
+2013-02-08 rhl
+       Permit environmental variables in setup{Optional,Required}.
+
+       Allow ${XXX} (no ?) when referencing environmental variables; abort if XXX is not defined
+
+2013-02-07 rhl
+       Fix bug whereby you couldn't use other-users' tags referring to shared stacks
+
+2013-01-09 rhl
+       Committed support for --debug=profile (it was written I don't know when)
+
+2012-09-13 rhl
+       Support eups distrib list -v prod [version] to list dependencies of specified product
+
+2012-06-27 rhl
+       Added print command to table files.  The first word (which may be separated by a comma) may be one of
+       stdout, stderr, stdok, stdinfo, stdwarn
+
+2012-05-23 rhl
+      Added --checkCycles to eups list to detect cycles in dependencies
+
+2012-04-13 rhl
+       Added --raw option to eups list to generate machine-parseable output
+
+       Made it possible to use locks even when parts of EUPS_PATH are write protected
+
+2012-04-04 pprice + rhl
+       Some versions of readline emit junk to stdout when sourced (e.g. on os/x 10.7).  Workaround
+       this bug
+
+2012-02-27 rhl
+       Add support for envUnset(PRODUCT_DIR) to disable setting e.g. GIT_DIR; other environment variables
+       may not be unset (as unsetup can't easily set them again)
+
+2012-02-16 rhl
+       Added --noCallbacks option to disable calling user callbacks (as defined in e.g. startup.py)
+
+2012-02-15 rhl
+       *WARNING* Changed meaning of setup -T
+       To specify a setup type use --type (e.g. --type build); -T is now used to specify a tag
+       that goes after any version or versionExpr in the VRO.
+
+       E.g.
+          setup -t rhl -T beta
+       means that rhl overrides any version specifications, and beta provides a backup if nothing
+       else matches
+
+2012-02-14 rhl
+       Added eups list --name to only print product names (e.g. eups list -t rhl --name)
+
+2012-01-23 rhl
+       Handle LOCAL: versions in tags files (if the directory exists)
+
+2012-01-23 rhl
+       Add "white" and "black" colours, and an optional ";bold" suffix.
+
+2012-01-06 rhl
+       Set the version to LOCAL:... with setup -r XXX prod version
+
+2011-12-19 rhl
+       Make "eups remove -t rhl product" remove a tagged version, as opposed to
+       "eups remove -t tag" which deletes a tag
+
+       Make eups undeclare -t XXX remove the version as well as the tag if the only
+       version name is of the form tag:XXX
+
+2011-12-15 rhl
+      Added support for storing arbitrary files in the ups_db (parallel to the method
+      used to support -M filename); the directory is available as the environment variable
+      $PRODUCT_DIR_EXTRA
+
+      E.g.
+            eups declare ... -L /u/rhl/foo.cfg:cfg -L bar:ups/aaa/mine.goo
+      to create $PRODUCT_DIR_EXTRA/cfg/foo.cgf and $PRODUCT_DIR_EXTRA/ups/aaa/mine.goo
+
+      N.b. the location of "-M" table files has (transparently) moved; they are now in
+      	    $PRODUCT_DIR_EXTRA/ups/product.table
+
+2011-12-08 rhl
+      Switched name of default product from "toolchain" to "implicitProducts";
+      the old name is still secretly supported
+
+2011-12-07 rhl
+      Add hooks.config.Eups.colorize to colour error messages (if your terminal supports it).
+      The value can be a bool or a dict with keys taken from ["OK", "INFO", "WARN", "ERROR"] and values
+      supported colours (e.g. "red")
+
+2011-12-07 rhl
+    Taught "eups admin info" to list manifest files
+
+2011-12-07 rplante
+    bug fix: eups.findProducts(): handle version/tag collision, added tests for vers. expr.
+
+2011-11-14 cloomis
+    add SunOS flavor
+
+2011-11-11 price
+    Cleanup of 'eups distrib create --rebuild' functionality.
+    
+    New callbacks are:
+      hooks.config.Eups.repoVersioner: callable that receives a product name and version
+    name and returns the "repository version" (i.e., version name before any rebuilds).
+      hooks.config.Eups.versionIncrementer: callable that receives a product name and
+    version name and returns the next "build version".
+    
+    The defaults for both of these implement "plus versions".
+    
+2011-11-07 rhl
+    Make expressions work with eups list
+
+2011-11-07 rhl
+    Allow user to say "eups.Eups.allowRaise = True" in startup.py
+
+2011-10-27 rhl
+    Permit -r ~/foo in table files
+
+2011-10-26 rhl
+    Handle more than one tag in a table file entry; allow both tags and an explicit version
+
+2011-10-26 rhl
+    Support -r in setup{Optional,Required}
+
+2011-10-26 rhl
+    Handle setupRequired(-t productName) n.b. missing tag name
+
+2011-10-21 price
+    Fix product remapping during repository creation so that remapped products get identified
+    with table files, flavor, and distId: introduced new method Distrib.updateDependencies()
+    to do this.
+
+2011-10-20 price
+    Clean up handling of letter versions in expanding build files.
+
+2011-10-20 rhl
+    Handle e.g. hooks.config.distrib["builder"]["variables"]["SVNROOT"] in user's startup.py files
+
+2011-10-20 rhl
+    Retry taking exclusive lock in case a shared lock (e.g. a setup or expandtable) is still running
+
+2011-10-19 rhl
+    Detect 64 bit for os/x 10.7
+
+2011-09-25 rhl
+    Permit setup ... -m none
+
+2011-09-25 rhl
+    Local products need not have tables
+
+2011-09-25 rhl
+      Don't fail if you can't create the lock directory when you only need a shared lock
+
+      Updated the bash_completion code
+
+2011-09-20 rhl
+      Add option hooks.config.site.lockDirectoryBase to control the existence or location of lock files;
+      you are expected to set this in a site, not personal, startup.py directory
+
+      If None, no locking is performed.  If a path, create lock directories relative to that location
+      (e.g. "/tmp" means that you'll have lock directories such as "/tmp/u/lsst/products/.lockDir")
+
+2011-09-14 rhl
+      Complain (if verbose) and continue if unable to create a lock directory in the stack.
+
+2011-09-12 rhl
+      Make "setup -r . foo 1.2.4" use foo 1.2.4's table file for dependencies, but set PRODUCT_DIR to .
+
+2011-09-07 rhl
+
+      Redid locking so you can have multiple shared locks (e.g. setup), a single exclusive
+      lock (e.g. eups declare), or no locking (--nolocks or e.g. eups path)
+
+      N.b. This is done at the eups/setup level so there is no locking if you're running your own scripts
+      using the eups api.  You can lock by saying something like:
+      	    import lock
+      	    locks = lock.takeLocks("myCmd", eups_path, lock.LOCK_SH, nolocks=False, verbose=0)
+      eups will take care of the cleanup (or you can; lock.giveLocks(locks, verbose=0))
+
+      Also added "eups admin listLocks"
+
+2011-08-18 rhl
+      Added support for [optional] ConfigParser files in ups dirs; if distrib.binary is present and True,
+      don't bump letter version with distrib create --rebuild
+
+2011-08-17 rhl
+      Handle the case that we only have access to a "letter version" rather than the original
+      svn/hg/... version
+
+2011-08-17 rhl
+      Optional products should be labelled optional in the exact block, even if we did find them when
+      expanding the table
+
+2011-08-15 rhl
+      Generate warning upon attempting to undeclare other people's tags (the attempt still fails)
+
+2011-08-14 rhl
+      Don't include product foo when expanding foo.table
+
+2011-07-06 price
+      Only allow versions that are actually setup to be expanded. eups.getDependencies() was not necessarily
+      using the correct (setup) version.
+
+2011-06-24 rhl
+	Expand @$VAR@ to ${VAR:-VALUE} (rather than @VAR@ -> VALUE) allowing them to be overridden by
+	environment variables at runtime.
+
+2011-06-22 rhl
+
+	Added --rebuild and --rebuildSuffix options to eups distrib create to permit the generation
+	of "letter versions", i.e. version with identical source code, but built against a changed ABI.
+
+	Allow a prefix [create] in manifest.remap files to ignore (or remap) products when creating a
+	distribution
+
+	Allow a file template.build in one of the startup locations (i.e. places where startup.py can lurk)
+	to be used to build any product without a build file.  It's not clear how useful this is, as you
+	may still need a table file
+
+	Allow e.g. 
+	  hooks.config.distrib["builder"]["variables"]["SVNROOT"] = "svn://svn.lsstcorp.org"
+	in a startup.py file (overriding the environment).  Any key in this dict is eligible for
+	expansion (e.g. @HGROOT@).
+
+
+2011-05-26 rhl
+	Permit config.Eups.userTags of the form (["XXX", "YYY*"], "rhl") (i.e. a glob)
+
+2011-05-05 rhl
+	Make eups list show the ups_db that a tag appears in if it's declared in more than one
+
+2011-05-03 rhl
+	Added support for && (== and) in version expressions, e.g.
+	    eigen >= 2.0.0 && < 3.0.0
+	Not a full parser, so caveat emptor
+
+2011-04-27 rhl
+	Support eups -t file ...
+
+2011-04-21 price
+	Added first-cut script at bash command-line completion for eups and setup commands.
+
+2011-04-17 rhl
+	  1/ Call expandtable on installed tables
+	  2/ Fix installation of server tags
+	  3/ Make the first installation of any product current if no other tags are specified
+	  4/ Declare dummy versions if requested by directives in manifest.remap
+
+2011-04-16 rhl
+	Support $?{PRODUCT_DIR} in table files
+
+2011-04-14 rhl
+	Ensure that only the first occurrence of a TAG.list file on the pkgroot path is used. N.b. as a
+	feature, an empty early current.list file will render NCSA's invisible; maybe there should be a way to
+	say, "and continue searching"
+
+2011-04-14 rhl
+	Don't set "current" from the server unless you specify -C
+
+2011-04-14 rhl
+	Support "eups distrib declare -t XXX" to declare all XXX tags
+
+2011-04-12 rhl
+	Added a product (defaultProduct in hooks.py) that is implicitly added to all
+	table files. N.b. not used if there is no tablefile; this is a bug
+
+2011-04-12 rhl
+	Support multiple tags in eups list
+
+2011-04-12 rhl
+	Make failed servers on EUPS_PKGROOT a failure unless forced
+
+2011-03-24 rhl
+	Added eups list --topological to perform a topological sort
+
+2011-03-22 rhl
+        Added a -N (--nolock) option to setup, and arranged that registered callback functions are called
+	twice (once with a null Eups object);  the first time is early enough to be used to disable locking
+
+	Documented callback functions
+
+2011-01-21 rhl
+	Permitted
+		setup -t XXX -r .
+	to deduce the product (foo) from ups/foo.table and set the version to "none"
+	N.b. the path is probably of the form .../foo so the normal "-r ." deduction would
+	guess that the product was ... and the version foo;  this is correct for installed
+	versions, but -t versions are often not installed
+
+2010-12-30 rhl
+	Fixed various aspects of the (type == "exact") processing
+
+	Allow a user to specify that a tag is defined by some other user, e.g.
+	hooks.config.Eups.userTags = [("beta", "rhl")]
+
+2010-12-15 rhl
+	Made expandtable set the exact versions in an if (type == "exact") block
+
+	Allow more than one setupType (e.g. -T "build exact" or -T "build,exact").  Interpret
+	      if (type == "exact")
+	as
+	      if ("exact" in type)
+
+	Make -e equivalent to -T exact, and reinstate the behaviour that specifying an explicit version
+	sets --exact (unless you say --inexact)
+
+	Make setupType == exact remove user/global tags from the VRO (with the exception of tags explicitly
+	set with e.g. -t XXX)
+
+	The result of these changes is that you can setup the exact versions that a product was installed with,
+	without any guesswork with
+		setup foo x.y.z
+
+2010-09-02 rhl
+
+	Tags in startup.py are now all lists (allowing you to append without worrying about whitespace);
+	watch out for python's nasty habit of treating a string as a list of characters...
+
+	Added ability to specify a file as a tag (-t FILENAME) which contains a set of "product version" pairs;
+	"setupRequired(product version)" is also permitted.  The file may be explicitly indicated as
+	-t file:FILENAME in case "file" is also a valid tagname (which takes priority)
+
+	Automatically added a tag to the start of the VRO if no VRO is explicitly specified for that tag
+
+	Fixed --keep; it now works by adding "keep" to the VRO
+
+	Added ~/.eups/manifest.remap to allow the user to override/delete versions in a distribution, e.g.
+	doxygen:1.5.9  			1.6.3
+	python:Any			2.6.1
+	tcltk				None
+
+        Many changes (I should look them up and document them.)
+
+2009-10-12 gk
+	Changed the Makefile in doc so that the install never fails for documentation errors.
+	ticket https://trac.sdss3.org/ticket/325
+
+2009-10-11 rhl
+	Fixed
+		eups declare -c prod version
+	for NULL (in general fallback flavors) products; ticket https://trac.sdss3.org/ticket/354
+
+2009-10-06  rhl
+
+	Fix some HeadURL issues so eups version works (setup version already did)
+
+2009-10-05  rhl
+
+	Added warnings for ignored options in table file setups, and warn
+	that -e is implied when you specify a version to setup
+
+2009-09-26  rhl
+
+	Search fallback flavors for a current version in eups list
+
+2009-09-24  rhl
+
+	Allow a table file to have no actions if setup didn't specify
+	e.g. -T build
+
+2009-09-17  rhl
+
+	Only read the desired flavor from a cache; make clearCache clear
+	all fallback caches too
+	
+	allow "eups list -D -c product"
+
+2009-09-16  rhl
+
+	Partial support for "declareOptions"; write caches of the correct
+	flavour when using fallback flavors
+	
+2009-09-14  rhl
+
+	Handle fallback flavors when the table file specifies an explicit
+	flavor (e.g. NULL)
+
+2009-08-28  rhl
+
+	Make eups_flavor just call eups flavor
+
+2009-08-25  rhl
+
+	Changes to handle old ups files from FNAL
+
+	Allow "setup -r . PROD" even if ups/PROD.table doesn't exist
+
+2009-08-05  rhl
+
+	  1/ Add general mechanism, setFallbackFlavors, to handle flavors
+	  to try if the specified flavor is missing. The default is to try
+	  "Generic" then "NULL", but this could deal with Linux flavors too
+	
+	  2/ Make eups list report any product that would be setup after
+	  processing the setFallbackFlavors list
+
+2009-08-04  rhl
+
+	Look in eupsPathDir for table files (even if UPS_DIR is set to $UPS_DB)
+	
+	Allow setting up flavors "Generic" or "NULL" if the
+	  desired flavor of a product/version is not available
+	
+2009-03-30  rhl
+
+	Removed invalid check that tripped up on versions such as ">= 1.2"
+
+2009-02-07  rhl
+
+	Renamed version_cmp so that the public version has no leading _;
+	fix error message about no current when a tagname is meant
+
+2009-02-06  rhl
+
+	Added configure option --disable-docs; don't fail if building docs
+	and LaTeX is present but fails; #575
+
+2009-01-26  rhl
+
+	Make eups declare once more refuse to redeclare a product without
+	--force
+
+2009-01-22  rhl
+
+	Support "eups distrib install --tag=current --declareAs=stable ..."
+	
+2008-11-25  rhl
+
+	Don't add >= clauses to LOCAL:XXX versions
+
+	Support eups list --exact
+
+2008-11-18  rhl
+
+	Install all versions (even if none are specified in the input
+	table file) as absolute and also relative for the use of setup
+	--exact
+	
+	Don't print changes setup makes to the environment unless v > 2
+
+2008-11-14  rhl
+
+	Implement eups distrib --nobuild
+
+	Support "eups undeclare foo" if only one version is
+	declared. N.b. this doesn't choose the current version; if there's
+	more than one version declared, you must always be specific.
+
+2008-11-13  rhl
+
+	Added "eups pkgroot" command
+	
+	Added zsh support; modification of Francesco Pierfederici's patch
+	
+	If an absolute version fails try ">= version"
+	
+2008-11-12  rhl
+
+	Fixed support for $?{foo} in table files; support \! (or not) and
+	${var:-val} in table expressions
+	
+	Make "unsetup --force" unset environment variables even if table
+	file has been deleted
+	
+	Fix failed optional setups of non-existant (or non-matching)
+	products indirectly depending on top-level product when keep was
+	true; previously they were unsetup
+	
+2008-11-10  rhl
+
+	Fix comparing versions with > 1 hyphen; support sorting NNN
+	numerically in X.Y.Z+preNNN; add ability to declare products
+	current locally within an instance of Eups
+
+2008-09-26  rhl
+
+	Don't complain about missing UPS_DIR if table's an absolute name
+
+2008-09-02  rhl
+
+	Properly quote arguments to setup, permitting e.g. "setup swig '> 1.3.35'"
+	
+2008-08-05  rhl
+
+	Support eups declare -r .
+	
+2008-08-02  rhl
+
+	Make --tag=XXX override already-installed versions in manifests;
+	only read XXX.list (e.g. current.list) once
+
+2008-08-01  rhl
+
+	Allow the chaining of operators, e.g. @VERSION.replace(...).sub(...)@
+	
+	Make eups distrib --nodepend work
+
+	Support EUPS_PKGROOT being a | (NOT :) separated path
+
+2008-07-31  rhl
+
+	Check that productDir exists when declaring
+	
+	Use old value of tablefile if available when declaring current
+	
+	Make setup (not eups_setup) return false if a setup fails
+	
+	Look for eupsPathDir in product root even if only declaring current
+
+2008-07-28  rplante
+
+	Make sure listProducts checks the version for local products
+
+2008-07-17  rhl
+
+	Fix problems merging flavors in version files
+	
+	Support setup --type=build (and generalisations) and use in eups
+
+	distrib create; move locks to /tmp
+
+2008-07-16  rhl
+
+	Support eups list --dependencies
+
+2008-07-02  rhl
+
+	Added "eups admin listCache"
+
+2008-06-24  rhl
+
+	Detect invalid sub-commands (including "eups setup ...")
+	
+	Generate a warning, not a failure, on qualifiers in table files
+	
+	Don't declare non-top-level products current
+	
+	If declaring the sole instance of a product, automatically declare it current
+
+2008-06-20  rhl
+
+	More compatibility with products already setup by old eups
+	
+	Check for existance, not value of env. variables; make force force
+	re-setting up of products
+	
+2008-06-04  rhl
+
+	Allow eups list's product and/or version to be glob expressions
+
+2008-06-03  rhl
+	Implement "configure --with-setup-aliases=name1:name2"
+
+2008-05-14  rhl
+
+	Support setup --keep (I hope it's correctish)
+
+2008-04-30  rhl
+
+	lockfile support
+
+2008-04-28  rhl
+
+	Start of rewrite in pure python
+
+2008-04-21  rhl
+
+	Made eups remove -R check dependencies by default (but sped up the
+	code)
+
+	Made eups remove -R prompt user before doing anything (by default)
+	
+	Added --depth and --optional flags to eups uses
+
+2008-04-14  rhl
+
+	Make eups.dependencies() propagate setupOptional correctly
+	
+	"setup product -v" now draws lines to help you see what setups what
+	
+2008-04-12  rhl
+
+	Initial (veerry sloow) version of eups remove -R -C
+
+2008-04-11  rhl
+
+	Added eups remove and eups uses
+
+2008-04-09  rhl
+
+	Support -i in expandbuild
+
+	Don't hide fatal errors at the top of a Long page of error messages
+	
+	Make dependencies_from_table return optional nature of setups
+	
+	Don't hide fatal errors at the top of a Long page of error
+	messages
+	
+	Ignore (with warning) optional products that can't be distributed
+	
+2008-04-08  rhl
+
+	Support eups distrib install --install-flavor
+
+2008-04-03  rhl
+
+	eups undeclare --force in changes list (and added timestamp)
+	
+	eups undeclare --force
+
+	Don't let -k stop me from saying setup -r .
+
+	Support --force to undeclare a setup product
+
+2008-03-30  rhl
+
+	Minor tweaks to get clean html iff html2latex is available
+	
+	Handle missing latex2html
+
+	Add -k option to keep already-setup local products (i.e. those
+	that aren't declared in some element of EUPS_PATH) when setting up
+	further products that would otherwise replace our previous choice
+	of version
+
+	Fix code that checks if a version is being unsetup that doesn't
+	match expected version (including logical expressions)
+	
+	Fix warning about replacing an already setup version to report
+	"current" not "" (and allow --quiet to suppress message)
+	
+	Support EUPS_FLAGS to provide default options to all eups commands
+	
+	Add -k option to keep setup local products
+
+	Add "eups flags"
+
+2008-03-19  rhl
+
+	Add support for eups distrib --list
+
+
+	Make eups distrib handle case the table file is in a product of a
+	different name (e.g. scons.table is in sconsUtils/ups)
+	
+	Make eups distrib note when a missing build/table file is present in ./ups
+
+	Teach dependencies_from_table about relative versions in table
+	files
+
+	Support quoted arguments to setup including spaces
+
+2008-02-27  rhl
+
+	Support setup --max-depth
+
+	Add support for only reporting top n levels of dependencies; make
+	eups.dependencies() understand "current"
+
+2008-02-11  rhl
+
+	Support "eups list prod LOCAL:/product/dir" (mostly for eups.list()'s sake)
+	
+	Support ~ (but not ~user) when using -r to specify product
+	directories; this only matters in table files (where the shell
+	didn't already expand the ~ for you)
+
+2008-01-26  rhl
+
+	Fixed bug in comparing versions such that "eups list product 2.1"
+	would list version 1.0 (and LOCAL:...)
+
+2008-01-25  rhl
+
+	Make setup return true/false status
+
+	Process dependencies in table files even with --noeups
+
+	Support path operations; allow eups declare to deal with /dev/null
+	as a product_dir
+
+2008-01-24  rhl
+
+	Provide more context when a setup fails
+	
+	Support "eups declare -n"
+
+2007-12-16  rhl
+
+	Improve error messages with "env EUPS_PATH= setup -r XXX"
+
+2007-12-15  rhl
+
+	Use os.path.samefile not our home-brewed version
+	
+	Search buildPath for table files when --noeups
+
+	Make failure to declare a version raise an error; make list return
+	a single product even if we ask for current/setup and nothing is
+
+2007-12-13  rhl
+
+	Don't allow a user to undeclare a setup product (as it couldn't be unsetup later)
+
+	Don't pretend that setupRequired within a setupOptional is fatal;
+	check that the version being unsetup is correctly specified; use
+	current version if it matches logical condition; allow setup -r
+	... even if EUPS_PATH is undefined
+
+	Allow "eups declare product version" to find the root
+
+2007-12-05  rhl
+
+	Make unsetting up after e.g. "setup -r . mwi XXX" work; #241
+
+2007-12-04  rhl
+
+	Expand setups in build files when writing to
+	disk; exit on invalid build file; add --noeups to generate
+	build/manifests for non-eups products
+
+	Added eups undeclare; changed order of arguments for declare (and
+	declareCurrent); make unexpanded CVS/SVNROOT an error in
+	buildfiles (and support $SVNROOT)
+
+2007-12-03  rhl
+
+	Added -C as an alias for -c, for consistency with eups distrib
+
+2007-12-01  rhl
+
+	Make -h work with python <= 2.3
+
+2007-11-27  rhl
+
+	Make eups distrib remove target file if it already exists
+	
+	Implement pkg-config inline as it's absent in vanilla os/x
+
+2007-11-26  rhl
+
+	Make eups.dependencies keep the FIRST occurrence of each product
+	
+	Minor tweaks to eups distrib. It now works with at least
+	babayaga->ishmael
+	
+	Fix distribution of current products when no version is specified
+
+2007-11-25  rhl
+
+	Make eups distrib create builds/manifests directories as needed
+
+	Work on eups distrib --create --build
+
+	Make eups undeclare -q independent of -v
+
+	Use our system (which throws exceptions); look for
+	manifests/builds in packages/manifests/builds; make force work
+	with --current
+
+2007-11-20  rhl
+
+	Change default directory to build in from build to EupsBuildDir
+	
+	Copy build file into build directory for help in debugging failed builds
+	
+	Move guts of eups_distrib to eups.py
+
+	Allow build files to use wget/curl
+
+2007-11-18  rhl
+
+	Don't put any extra whitespace into "eups path n" (allowing use in e.g. $(eups path 0)
+
+2007-11-08  rhl
+
+	Fix eups list logic with non-existent products
+	
+	Remove foo/.. from relative path names
+
+	Pay attention to flavor when resolving logical expressions in setup commands
+
+	Make eups list handle non-existent products
+
+2007-11-03  rhl
+
+	Suppress warning on implicit == with version strings containing +-
+	
+	Don't warn about unexpanded variables that are actually in the environment
+
+2007-10-26  rhl
+
+	Stop "eups list product" printing a LOCAL line when a product isn't last in EUPS_PATH
+
+2007-10-23  rhl
+
+	Make eups list include "Setup" once more
+
+2007-10-15  rhl
+
+	Allow version expressions in eups list
+
+2007-10-14  rhl
+
+	Set SHELL in eups.py if needs be -- it's needed to run real eups commands
+	
+	Add declareCurrent and productDir
+
+2007-10-11  rhl
+
+	Use "eups cmd" not "eups_cmd"
+
+	Support "eups declare -r XXX version"
+
+2007-10-10  rhl
+
+	Make eups declare -r none work again
+	
+	 Make "eups distrib -i foo -C" work even if foo is declared
+	
+	Allow us to declare a product current
+
+2007-10-09  rhl
+
+	Don't print setup/current with eups list -d
+
+2007-09-20  rhl
+
+	Support $?{name} in table files
+
+2007-09-18  rhl
+
+	Support using scp as a transport agent
+	
+	Get build file distribution working
+
+	Added dependencies_from_table
+
+2007-09-17  rhl
+
+	Put products into manifest with most-depended-on product first
+	
+	Make format for eups list for LOCAL products consistent with declared products (helps eups.py)
+	
+	Support eups distrib --build
+
+	Fix install target
+
+	Added eups expandbuild
+
+2007-09-14  rhl
+
+	Make setup check that $SHELL is set
+
+2007-09-12  rhl
+
+	Support "eups setup -h"
+	
+	Make a simple "eups path" work again
+	
+	Support "eups path n"
+
+2007-09-10  rhl
+
+	Handle ../.. in -r paths
+	
+	Handle things like "setup -r ../foo" more nicely, removing the XXX/.. from the path
+	
+	Make eups list handle products setup -r
+
+2007-09-03  rhl
+
+	Implemented -i to ignore version info in table files
+
+2007-09-01  rhl
+
+	Fix stripping comments with leading space
+	
+	Really fix missing EUPS_PATH for csh in mksetup (1 --> 0)
+	
+	Allow user to omit product name when using setup -r
+	
+	Make things work with csh even if EUPS_PATH isn't set
+
+2007-08-30  rhl
+
+	Don't allow :: in paths
+	
+	Fix support for a leading/trailing delimiter in env{Pre,Ap}pend's value
+	
+	Support a leading/trailing delimiter in env{Pre,Ap}pend's value
+
+2007-08-17  rhl
+
+	Detect unexpanded variables in generated file; probable typos in table dfiles
+	
+	Unify setup{Optional,Required}, which also removes spurious "ERROR: REQUIRED UNSETUP" messages
+
+2007-08-16  rhl
+
+	Remove absolute links from latex2html output
+	
+	Don't complain about Action = setup lines at $debug <= 1
+
+	Don't make $vers mine in an inner block in eups_undeclare
+	
+	Make $vers mine in eups_setup (it's a returned value, so don't
+	modify caller) This means that setup -r XXX PPP -v prints "LOCAL"
+	as the version string
+	
+	Make list() understand versions "current" and "setup", and return
+	None as needed. Added database, directory, isCurrent and isSetup
+
+2007-08-10  rhl
+
+	Set %setupVersion correctly when not using -v
+
+2007-08-08  rhl
+
+	Added more test cases for version ordering
+	
+	Don't report multiple setups of products unless $debug >= 2
+	
+	Support version names such as 1.2-rc2+fix1
+
+2007-08-03  rhl
+
+	Make eups_expandtable work in presence of version logicals (they aren't checked)
+	
+	Fatal errors now do NOT source the file that actually does things
+
+	Allow setup -r . and eups declare -r . (i.e. relative paths)
+	
+	setupRequired/setupOptional now accept logical expressions for
+	version numbers, e.g. "setupOptional(scons >= 1.16 || rhl || svn)"
+
+2007-06-12  rhl
+
+	Propagate the proper DB to the eups undeclare command
+
+2007-06-01  rhl
+
+	Make elements in PATHs unique; support being '' (i.e. ups dir is directly in $EUPS_PATH)
+
+2007-05-27  rhl
+
+	Really handle missing PROD_DIR
+	
+	Slightly improve diagnostic
+
+	Handle missing PROD_DIR
+
+	Fix processing EUPS_PATH
+
+2007-04-02  rhl
+
+	Make setup eups work even when deleting parts of EUPS_PATH with envAppend
+	
+	Don't be confused by a valid version file with an invalid flavor early in EUPS_PATH
+	
+	Fix pattern patching for -z to match at end/start of path
+	
+	Make configure write separate EUPS_PATH components separately in
+	eups.table so as to allow proper unsetup
+
+2007-03-31  rhl
+
+	When sourcing setups.[c]sh keep old EUPS_PATH at end of new EUPS_PATH
+	
+	Add eups --help path
+
+	Add eups path
+
+2007-03-29  rhl
+
+	Support setup -D -M file
+
+2007-03-13  rplante
+
+	Detect after installing whether package has been declare already;
+	if so, don't declare.
+
+2007-03-06  rhl
+
+	Set PYTHONPATH correctly if it doesn't already exists
+
+2007-02-21  rhl
+
+	Check if environment variables are set, not are not blank
+
+2007-02-20  rhl
+
+	Handle "Requires:" statements in .pc files
+	
+	Use eups list, and dump errors now that the directory goes to stdout
+
+2007-02-14  rhl
+
+	Support eups_expandtable --product PROD=VER
+
+2007-02-09  rplante
+
+	Removed bug introduced in v1.27: allow --current to set current on all
+	newly installed products.
+
+2007-02-09  rhl
+
+	Intel macs are DarwinX86
+
+2007-02-05  rhl
+
+	Support eups expandtable
+	
+	Support reading from stdin
+	
+	Support -r none
+
+2007-01-19  rhl
+
+	Make eups.list() _always_ return setup status
+	
+	Properly join an error list; check for unwanted arguments
+	
+	Use parens with raise ERROR, "format" % (args)
+	
+	Fixed error message setting up current version of a product when
+	no version is declared current
+
+.......
+	
+2003-01-23  
+
+	Standard project directories initialized by cvs2svn.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Here are the old Release Notes:
+
+
+v0_7_17: New features:
+	   - Added GNU configure support. (RHL)
+	   - Added support for colon-delimited $EUPS_PATHs (CPL)
+
+v0_7_14: Changes to evilinstall in an attempt to support more SDSS products
+
+v0_7_13: Trivial bug fix
+
+v0_7_12: Added version information to -h option; added export commands 
+	 to setups.sh
+
+v0_7_4: Trivial bugfix
+
+v0_7_2: Verbosity levels adjusted
+
+v0_7_1: Minor bugfix in extract_table_commands()
+
+v0_7: Continuation of the Great Cleanup
+	-- Proper help is now added into the code
+
+	-- Complete rewrite of the extract_table_commands();
+	   Now includes support for table files that have a common
+	   commands section before the flavor specifications.
+
+
+v0_6: First tag after the Great Cleanup.
+
+	-- More work on new minimalistic table files; bugs fixed
+
+	-- Significant cleanup/factoring of code
+
+	-- New argument parser in eups_setup
+
+	-- Reduced chatter if $debug == 1 (but can set -v -v to set it to 2)
+
+	-- Indented "Setting up" lines (with -v) to indicate depth of dependency nesting
+
+
+
+v0_5: A branch; the first version on this branch (v5_0_0) is identical to v0_4
+
+At this point, the code was enhanced:
+
+	-- EUPS now includes support for minimal table files, or, indeed,
+	no table file at all ("-m none")
+
+	-- setupenv and proddir are now deprecated. The appropriate environment
+	variables are automatically set.
+
+	-- Removed hardcoded file sizes from eups_setup.pm
+
+	-- Added checks that ensure that the Table files are properly formed.
+
+
+v0_4 :
+	-- evilinstall now uses eups_expandtable
+
+	-- Created eups_expandtable to expand table files
+
+	-- Evilinstall now no longer calls sdssmake with the -idl flag.
+
+	-- The toplevel Makefile now copies over the GPL license and the 
+	   Release_Notes
+
+
+v0_3 : 
+    
+	-- The Makefile now creates the $(PRODUCTS) (where the database is)
+	  and $(PROD_DIR_PREFIX) (where the products are) directories.
+
+
+v0_2 :  Tagged Saturday, April 5,2003 0130
+
+        -- Fixed bug with setup - now correctly unsets previous setups.
+ 
+        -- -z now propagates the database to all dependencies.
+
+        -- Shifted the perl location to /usr/bin/perl from /usr/local/bin/perl
+ 
+        -- Added the GNU General Public License (gpl.txt).
+
+	-- Table files are now forced to be in the ups/ subdirectory of the 
+	product directory, and have to have the name $PRODUCT.table. The -m
+	option is still accepted by setup, but is overriden, as is any 
+	information about table files in the version files.
+
+	-- eups_declare changed to reflect the changes brought about by
+	the above change.
+
+	-- The Makefile has been changed to be Solaris compliant.
+
+	-- Fixed a bug with pathPrepend in the table file reader.
+
+	-- Fixed a bug with command line argument passing in eups_setup
+
+v0_1 : First released version
