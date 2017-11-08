@@ -12,3 +12,6 @@ Untitled1.ipynb
 .ipynb_checkpoints/*
 .sconf_temp/*
 .sconsign.dblite
+lsst_dm/*
+sims_maf_contrib/*
+*.pyc
