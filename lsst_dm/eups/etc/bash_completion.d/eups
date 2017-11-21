@@ -1,0 +1,267 @@
+# Command-line completion for EUPS
+#
+# Source this file to enable command-line completion
+# Some parts may require the use of the bash_completion package.
+
+# What command was used (anywhere in command-line)?
+_eups_cmd() {
+    local commands=$*
+    local i c
+    for (( i = 0; i < ${#COMP_WORDS[@]}-1; i ++ )); do
+        for c in $commands; do
+            if [[ ${COMP_WORDS[i]} == $c ]]; then
+                echo $c
+                return 0
+            fi
+        done
+    done
+    return 0
+}
+
+# What product was used (previous word only)?
+_eups_product() {
+    local products=$*
+    local prod
+    local i
+    for (( i = COMP_CWORD-1; i > 0; i -- )); do
+        local prev=${COMP_WORDS[$i]}
+        for prod in $products; do
+            if [[ $prev == $prod ]]; then
+                echo $prod
+                return 0
+            fi
+        done
+    done
+    return 0
+}
+
+# Get list of products
+_eups_products() {
+    eups --nolocks list | awk '{print $1}' | sort -u
+}
+# Get list of tags
+_eups_tags() {
+    eups --nolocks tags | sed 's|user:||g'
+}
+# Get list of versions for a product
+_eups_versions() {
+    eups --nolocks list $1 | awk '{print $1}'| sort -u
+}
+
+# eups completion
+_eups()
+{
+    COMPREPLY=()
+    local cur=`_get_cword`
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    local commands="admin declare distrib expandbuild expandtable flags flavor help list path pkgroot pkg-config remove tags undeclare uses vro"
+    local general="--debug -h --help --nolocks -V --version --vro"
+    
+    local cmd=$(_eups_cmd "$commands $general")
+    
+    if [[ -z $cmd ]]; then
+        COMPREPLY=($(compgen -W "$commands $general" -- "$cur"))
+        return 0
+    fi
+
+    # Some common options
+    case "$prev" in
+        --debug|--debug=)
+            COMPREPLY=($(compgen -W "debug raise" -- "$cur"))
+            return 0
+            ;;
+        -r|--root)
+            _filedir -d
+            return 0
+            ;;
+        -M|--import-table|-m|--table)
+            _filedir
+            return 0
+            ;;
+        -t|--tag)
+            local tags=$(_eups_tags)
+            COMPREPLY=($(compgen -W "$tags" -- "$cur"))
+            return 0
+            ;;
+    esac
+
+    local common="-n --noaction --nlocks --noCallbacks -q --quiet -T --type -v --verbose -V --version --vro -Z --database -z --select-db --with-eups"
+    local options=""
+
+    case "$cmd" in
+        admin)
+            options="-t --tag -f"
+
+            local admin="buildCache clearCache listCache clearLocks listLocks clearServerCache info"
+            local admincmd=$(_eups_cmd $admin)
+            if [[ -z $admincmd ]]; then
+                COMPREPLY=($(compgen -W "$admin" -- "$cur"))
+                return 0
+            fi
+            case "$admincmd" in
+                info)
+                    products=$(_eups_products)
+                    ;;
+            esac
+            ;;
+        declare)
+            options="-r --root -M --import-table -m --table -t --tag -f --flavor"
+            ;;
+        list)
+            options="-D --dependencies --depth -d --directory -e --exact -r --root -s --setup -m --table -t -tag"
+            ;;
+        distrib)
+            local distrib="clean create declare install list"
+            local distribcmd=$(_eups_cmd $distrib)
+            if [[ -z $distribcmd ]]; then
+                COMPREPLY=($(compgen -W "$distrib" -- "$cur"))
+                return 0
+            fi
+
+            local common="$common -D --distrib-class -f --flavor --server-class -S --server-option -t --tag"
+
+            case "$distribcmd" in
+                install)
+                    case "$prev" in
+                        -d|--declareAs)
+                            local tags=$(_eups_tags)
+                            COMPREPLY=($(compgen -W "$tags" -- "$cur"))
+                            return 0
+                            ;;
+                        -g|--groupAccess)
+                            COMPRELPY=($(compgen -A g -- "$cur"))
+                            return 0
+                            ;;
+                        -I|--install-into|--tmp-dir)
+                            _filedir -d
+                            return 0
+                            ;;
+                        --manifest)
+                            _filedir
+                            return 0
+                            ;;
+                    esac
+                    options="-U --no-server-tags --noclean -j --nodepend -N --noeups --nobuild -C --current-all -c --current"
+                    ;;
+                create)
+                    case "$prev" in
+                        --manifest|-s|--server-dir)
+                            _filedir
+                            return 0
+                            ;;
+                        -d|--distribType)
+                            COMPREPLY=($(compgen -W "tarball builder pacman" -- "$cur"))
+                            return 0
+                            ;;
+                    esac
+                    options="-a --as -d --distribType -I --incomplete -j --nodepend -e --exact -f --use-flavor"
+                    ;;
+                clean)
+                    case "$prev" in
+                        -P|--product-dir|--tmp-dir)
+                            _filedir -d
+                            return 0
+                            ;;
+                    esac
+                    options="-R --remove"
+                    ;;
+            esac;;
+        --database|--debug|--select-db|-T|--type|--with-eups|-Z|-z) # an option with a value
+            COMPREPLY=($(compgen -W "$commands $general" -- "$cur"))
+            return 0;;
+    esac
+
+    local products
+    if [ $cmd == "admin" ]; then
+            case "$admincmd" in
+                info)
+                    products=$(_eups_products)
+                    ;;
+                *)
+                    products=""
+                    ;;
+            esac
+
+    elif [[ $cmd == "distrib" ]]; then
+        products=$(eups --nolocks distrib list | awk '{print $1}' | sort -u);
+    else
+        products=$(_eups_products)
+    fi
+    local prod=$(_eups_product $products)
+    if [[ -z $prod ]]; then
+        COMPREPLY=($(compgen -W "$products $general $common $options" -- "$cur"))
+        return 0
+    fi
+    
+    if [[ $prev == $prod ]]; then
+        local versions
+        if [[ $cmd == "distrib" ]]; then
+            versions=$(eups --nolocks distrib list $prod | awk '{print $1}'| sort -u)
+        else
+            versions=$(_eups_versions $prod)
+        fi
+        COMPREPLY=($(compgen -W "$versions $general $common $options" -- "$cur"))
+        return 0
+    fi
+
+    COMPREPLY=($(compgen -W "$general $common $options" -- "$cur"))
+    return 0
+}
+complete -F _eups eups
+
+# setup completion
+_setup()
+{
+    COMPREPLY=()
+    local cur=`_get_cword`
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+   
+    local options="-Z --database --debug -e --exact -f --flavor -E --inexact -F --force -h --help -i --ignore-versions -j --just -k --keep -l --list -m --table -S --max-depth -n --noaction -N --nolocks --noCallbacks -q --quiet -r --root -z --select-db -t --tag -T --type -u --unsetup -v --verbose -V --version --vro"
+
+    case "$prev" in
+        --debug|--debug=)
+            COMPREPLY=($(compgen -W "debug raise" -- "$cur"))
+            return 0
+            ;;
+        -r|--root)
+            _filedir -d
+            return 0
+            ;;
+        -m|--table)
+            _filedir
+            return 0
+            ;;
+        -t|--tag)
+            local tags=$(_eups_tags)
+            COMPREPLY=($(compgen -W "$tags" -- "$cur"))
+            return 0
+            ;;
+    esac
+
+    local products=$(_eups_products)
+    local prod=$(_eups_product $products)
+    if [[ -z $prod ]]; then
+        COMPREPLY=($(compgen -W "$products $options" -- "$cur"))
+        return 0
+    fi
+
+    if [[ $prev == $prod ]]; then
+        local versions=$(_eups_versions $prod)
+        COMPREPLY=($(compgen -W "$versions $options" -- "$cur"))
+        return 0
+    fi
+
+    COMPREPLY=($(compgen -W "$options" -- "$cur"))
+    return 0
+}
+complete -F _setup setup
+complete -F _setup eups_setup
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# sh-indent-comment: t
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh
