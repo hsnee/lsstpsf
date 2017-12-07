@@ -12,12 +12,6 @@ Untitled1.ipynb
 .ipynb_checkpoints/*
 .sconf_temp/*
 .sconsign.dblite
-<<<<<<< HEAD
-lsst_dm/*
-sims_maf_contrib/*
-*.pyc
-=======
 *.pyc
 sims_maf_contrib/*
 lsst_dm/*
->>>>>>> optimisation
