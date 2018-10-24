@@ -224,7 +224,7 @@ class ModelErrors():
               self.DitherPattern)
         print('using stackers:', self.Stacker)
 
-        if self.Maker == 'Peter':
+        if self.Maker is not 'OpSim':
 
             opsdb = db.OpsimDatabase(self.runName+'.db')
 
@@ -233,17 +233,21 @@ class ModelErrors():
             # MINION LEGACY if minion not in self.OpsimRun
             posRA = np.array([pos[0]*np.radians(1) for pos in posRA])
             posDec = np.array([pos[0]*np.radians(1) for pos in posDec])
-            notes = opsdb.fetchMetricData(['note'])
             filters = opsdb.fetchMetricData(['filter'])
             filters = np.array([fil[0] for fil in filters])
             nights = opsdb.fetchMetricData(['night'])
             nights = np.array([n[0] for n in nights])
-            ddf_cond = ['DD' not in (
-                str(note)
-                ).split(':')[0] for note in notes]
-            cond = np.logical_and.reduce((ddf_cond,
-                                          filters == 'i',
-                                          nights < int(self.year*365)))
+            if self.Maker is 'Peter':
+                notes = opsdb.fetchMetricData(['note'])
+                ddf_cond = ['DD' not in (
+                    str(note)
+                    ).split(':')[0] for note in notes]
+                cond = np.logical_and.reduce((ddf_cond,
+                                              filters == 'i',
+                                              nights <= int(self.year*365)))
+            else:
+                cond = np.logical_and(filters == 'i',
+                                      nights <= int(self.year*365))
             posRA = posRA[cond]
             posDec = posDec[cond]
 
@@ -256,7 +260,7 @@ class ModelErrors():
             self.Stacker = self.Stacker[1:]
 
         # MINION LEGACY if 'minion' not in self.OpsimRun and
-        if self.Maker == 'OpSim':
+        if self.Maker is 'OpSim':
             outDir = 'temp'
             myBundles = {}
             nside = 128
@@ -289,48 +293,48 @@ class ModelErrors():
                                                      resultsDb=resultsDb)
             bgroup.runAll()
 
-	    # MINION LEGACY
-	        # elif 'minion' in self.OpsimRun:
-	        #    print("old sims")
-	        #    opsdb = db.OpsimDatabaseV3(self.runName + '_sqlite.db')
-	        #    outDir = 'dither_test'
-	        #    resultsDb = db.ResultsDb(outDir=outDir)
-	        #    if self.DitherPattern=='field':
-	        #        slicer = slicers.HealpixSlicer(nside=64,
-	        #                 lonCol='fieldRA', latCol='fieldDec', latLonDeg=False)
-	        #    else:
-	        #        slicer = slicers.HealpixSlicer(nside=64,
-	        #                 lonCol=self.DitherPattern+'Ra',
-	        #                 latCol=self.DitherPattern+'Dec', latLonDeg=False)
-	        #    sqlconstraint = sqlWhere
-	        #    metric = metrics.CountMetric(col='night')
-	        #
-	        #    bundle = metricBundles.MetricBundle(metric, slicer,
-	        #                  sqlconstraint, runName=self.runName,
-	        #                  stackerList=self.Stacker)
-	        #    bgroup = metricBundles.MetricBundleGroup(
-	        #                  {self.DitherPattern+' dither':bundle},
-	        #                  opsdb, outDir=outDir, resultsDb=resultsDb)
-	        #    bgroup.runAll()
+        # MINION LEGACY
+            # elif 'minion' in self.OpsimRun:
+            #    print("old sims")
+            #    opsdb = db.OpsimDatabaseV3(self.runName + '_sqlite.db')
+            #    outDir = 'dither_test'
+            #    resultsDb = db.ResultsDb(outDir=outDir)
+            #    if self.DitherPattern=='field':
+            #        slicer = slicers.HealpixSlicer(nside=64,
+            #                 lonCol='fieldRA', latCol='fieldDec', latLonDeg=False)
+            #    else:
+            #        slicer = slicers.HealpixSlicer(nside=64,
+            #                 lonCol=self.DitherPattern+'Ra',
+            #                 latCol=self.DitherPattern+'Dec', latLonDeg=False)
+            #    sqlconstraint = sqlWhere
+            #    metric = metrics.CountMetric(col='night')
+            #
+            #    bundle = metricBundles.MetricBundle(metric, slicer,
+            #                  sqlconstraint, runName=self.runName,
+            #                  stackerList=self.Stacker)
+            #    bgroup = metricBundles.MetricBundleGroup(
+            #                  {self.DitherPattern+' dither':bundle},
+            #                  opsdb, outDir=outDir, resultsDb=resultsDb)
+            #    bgroup.runAll()
 
-	        # if 'feature' in self.OpsimRun:
-	        #     if self.objects_base == 'actual' and self.year == 1:
-	        #         print('year1')
-	        #         posRA, posDec = np.load('simruns/feature_baseline_y1.npy')
-	        #     else:
-	        #         print('year10')
-	        #         posRA, posDec = np.load('simruns/feature_baseline.npy')
-        if self.DitherPattern == 'field':
-            posRA = bgroup.simData['fieldRA']
-            posDec = bgroup.simData['fieldDec']
-        else:
-            posRA = bgroup.simData[self.DitherPattern+'Ra']
-            posDec = bgroup.simData[self.DitherPattern+'Dec']
-        pos = np.array((posRA, posDec))
+            # if 'feature' in self.OpsimRun:
+            #     if self.objects_base == 'actual' and self.year == 1:
+            #       print('year1')
+            #       posRA, posDec = np.load('simruns/feature_baseline_y1.npy')
+            #     else:
+            #       print('year10')
+            #       posRA, posDec = np.load('simruns/feature_baseline.npy')
+            if self.DitherPattern == 'field':
+                posRA = bgroup.simData['fieldRA']
+                posDec = bgroup.simData['fieldDec']
+            else:
+                posRA = bgroup.simData[self.DitherPattern+'Ra']
+                posDec = bgroup.simData[self.DitherPattern+'Dec']
+            pos = np.array((posRA, posDec))
 
-        # ONLY NON MINION
-        pos *= np.radians(1)
-        self.positions = pos.swapaxes(1, 0)
+            # ONLY NON MINION
+            pos *= np.radians(1)
+            self.positions = pos.swapaxes(1, 0)
 
         # DITHERING try:
         #    print('getting random rotational dithers')
