@@ -77,7 +77,7 @@ class ModelErrors():
         year (str): year of survey
     """
 
-    def __init__(self, ModelType, DitherPattern, Maker,
+    def __init__(self, ModelType, DitherPattern,
                  rotDithers, OpsimRun, objects_base, year):
         """Summary
 
@@ -100,14 +100,21 @@ class ModelErrors():
         # else:
         #     self.rundate = 'new'
 
-        self.Maker = Maker
+        if DitherPattern is 'alt_sched' \
+           or DitherPattern is 'alt_sched_rolling':
+            self.Maker = 'Daniel'
+        elif DitherPattern is 'rolling_10yrs_opsim' \
+            or DitherPattern is 'rolling_mis10yrs_opsim':
+            self.Maker = 'Peter'
+        else:
+            self.Maker = 'Opsim'
         self.fwhm = 0.7  # arcsec
         self.sigma = self.fwhm/(2*np.sqrt(2*np.log(2)))
         self.TrM = 2*self.sigma**2
         self.trace_ratio = 2.8933775060156068  # calculated in GalSize.ipynb
         self.PSF.TrM = self.TrM
         self.STAR.TrM = self.TrM
-        self.FOVradius = 1.8  # degrees
+        self.FOVradius = 1.75  # degrees
         self.alpha = 0.01
         self.ModelType = ModelType
         self.star_num = 50000
@@ -141,8 +148,6 @@ class ModelErrors():
         self.counter = defaultdict(int)
         self.ksstatistic = []
         self.pvalues = []
-        if 'alt_sched' in self.OpsimRun:
-            self.DitherPattern = 'field'
         self.DitherPatterns = {'random_night': 'randomDitherFieldPerNight',
                                'random_visit': 'randomDitherFieldPerVisit',
                                'spiral_night': 'spiralDitherFieldPerNight',
@@ -183,9 +188,8 @@ class ModelErrors():
             self.DitherPattern = self.DitherPatterns[DitherPattern]
             self.Stacker = [self.Stackers[DitherPattern]]
         self.rotDitherPattern = rotDithers
-        if self.rotDitherPattern == 'random_filter':
-            pass
-            # self.Stacker.append(stackers.RandomRotDitherPerFilterChangeStacker())
+        if rotDithers is True:
+            self.Stacker.append(stackers.RandomRotDitherPerFilterChangeStacker())
 
         self.savedStarsAngles = {tuple(k): [0] for k in self.stars}
 
