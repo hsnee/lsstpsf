@@ -1,6 +1,6 @@
 from collections import defaultdict
 import numpy as np
-from angles import arcs2r, arcs2d, d2arcs, d2r
+from angles import arcs2r, arcs2d, d2arcs, d2r, r2d
 import treecorr as tr
 import lsst.sims.maf.stackers as stackers
 import lsst.sims.maf.slicers as slicers
