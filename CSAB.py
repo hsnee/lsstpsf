@@ -256,7 +256,7 @@ class ModelErrors():
             self.Stacker = self.Stacker[1:]
 
         # MINION LEGACY if 'minion' not in self.OpsimRun and
-        if self.db == 'OpSim':
+        if self.Maker == 'OpSim':
             outDir = 'temp'
             myBundles = {}
             nside = 128
