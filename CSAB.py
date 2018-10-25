@@ -554,7 +554,7 @@ class ModelErrors():
         deltaMxy = starMxy - psfMxy
         deltaMyy = starMyy - psfMyy
 
-        self.counter[star_pos] = len(innerDithers)
+        self.counter[star_pos] = len(set(innerDithers))
         self.STAR.M[star_pos] = np.array([np.mean(starMxx),
                                           np.mean(starMxy),
                                           np.mean(starMyy)])
