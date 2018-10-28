@@ -634,7 +634,7 @@ def getRequirements():
 
 
 def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
-                           objects_base, proposal_format, overwrite=False):
+                           objects_base, overwrite=False):
     """
     Args:
         n (int): number of times this functions should run
@@ -661,6 +661,12 @@ def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
                     'pontus_2489': 3, 'pontus_2502': 2}
     countersDict = {}
     nightsNum = year*365
+    if OpsimRun not in list(proposalDict.keys()):
+        proposal_format = 'none'
+    elif OpsimRun == 'pontus_2502':
+        proposal_format = 'pontus_2502'
+    else: 
+        proposal_format = 'default'
     if proposal_format == 'default':
         sqlWhere = 'night < '+str(nightsNum)+' and \
         filter = "i" and proposalId = '+str(proposalDict[OpsimRun])
