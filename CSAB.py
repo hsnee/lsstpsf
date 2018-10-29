@@ -107,7 +107,7 @@ class ModelErrors():
             or DitherPattern is 'rolling_mis10yrs_opsim':
             self.Maker = 'Peter'
         else:
-            self.Maker = 'Opsim'
+            self.Maker = 'OpSim'
         self.fwhm = 0.7  # arcsec
         self.sigma = self.fwhm/(2*np.sqrt(2*np.log(2)))
         self.TrM = 2*self.sigma**2
@@ -148,13 +148,15 @@ class ModelErrors():
         self.counter = defaultdict(int)
         self.ksstatistic = []
         self.pvalues = []
-        self.DitherPatterns = {'random_night': 'randomDitherFieldPerNight',
-                               'random_visit': 'randomDitherFieldPerVisit',
-                               'spiral_night': 'spiralDitherFieldPerNight',
-                               'spiral_visit': 'spiralDitherFieldPerVisit',
-                               'hex_night': 'hexDitherFieldPerNight',
-                               'hex_visit': 'hexDitherFieldPerVisit',
-                               'field': 'field'}
+        self.DitherPatterns = {
+            'random_night': 'randomDitherFieldPerNight',
+            'random_visit': 'randomDitherFieldPerVisit',
+            'spiral_night': 'spiralDitherFieldPerNight',
+            'spiral_visit': 'spiralDitherFieldPerVisit',
+            'hex_night': 'hexDitherFieldPerNight',
+            'hex_visit': 'hexDitherFieldPerVisit',
+            'field': 'field'
+        }
         # MINION LEGACY if self.rundate == 'new':
 
         fieldidcolumn = 'fieldId'
@@ -522,7 +524,7 @@ class ModelErrors():
 
         try:
             rotDithers = self.rotTelPos[cond]
-        except AttributeError:
+        except TypeError:
             pass
 
         if self.ModelType == 'radial':
