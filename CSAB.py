@@ -722,3 +722,54 @@ def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
     return countersDict
     print('there are now {} runs total for this strategy'.format(
                                                 len(np.load(outName))))
+
+
+def getPositions(runName, year):
+    proposalDict = {'baseline2018a': 3, 'colossus_2664': 2, 'colossus_2665': 1,
+                    'colossus_2667': 1, 'kraken_2026': 3, 'kraken_2035': 3,
+                    'kraken_2036': 3, 'kraken_2042': 2, 'kraken_2044': 1,
+                    'mothra_2045': 1, 'nexus_2097': 1, 'pontus_2002': 1,
+                    'pontus_2489': 3, 'pontus_2502': 2}
+    directory = '/global/cscratch1/sd/husni/OpsimRuns/'
+    nights = year*365 + 1
+    opsdb = db.OpsimDatabase(directory+runName+'.db')
+    outDir = 'temp'
+    resultsDb = db.ResultsDb(outDir=outDir)
+    nside = 256
+    myBundles = {}
+    if runName in list(proposalDict.keys()):
+        sqlconstraint = 'filter = "i" and night < ' + str(nights) + \
+            ' and proposalId = ' + str(proposalDict[runName])
+    else:
+        sqlconstraint = 'filter = "i" and night < '+str(nights)
+    metric = metrics.ExgalM5(lsstFilter='i')
+    dustMap = maps.DustMap(interp=False, nside=nside)
+    stackerList = []
+    slicer = slicers.HealpixSlicer(nside=nside)
+    myBundles['field dither'] = metricBundles.MetricBundle(
+        metric=metric,
+        slicer=slicer,
+        constraint=sqlconstraint,
+        stackerList=stackerList,
+        runName=runName,
+        metadata='field dither',
+        mapsList=[dustMap])
+    bgroup = metricBundles.MetricBundleGroup(myBundles,
+                                             opsdb,
+                                             outDir=outDir,
+                                             resultsDb=resultsDb)
+    bgroup.runAll()
+    bundle = myBundles['field dither']
+    bundle.metricValues
+    vminDict = {1: 24.5, 3: 25, 6: 25.5, 10: 26}
+    vmin = vminDict[year]
+    cond = np.logical_and.reduce((bundle.slicer.getSlicePoints()['ebv'] < 0.2,
+                                  bundle.metricValues.mask is False,
+                                  bundle.metricValues.data > vmin,
+                                  bundle.metricValues.data < 28))
+    condx = (bundle.slicer.getSlicePoints()['ra'])[cond]
+    condy = (bundle.slicer.getSlicePoints()['dec'])[cond]
+    conds = [np.array([cxi, cyi]) for cxi, cyi in zip(condx, condy)]
+    a = np.array(random.sample(conds*100, 500000)) + \
+        np.random.normal(0, 0.009, (500000, 2))
+    np.save('newcutnpys/'+runName+str(year)+'.npy', a)
