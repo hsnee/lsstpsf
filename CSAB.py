@@ -101,7 +101,9 @@ class ModelErrors():
         #     self.rundate = 'new'
 
         if DitherPattern is 'alt_sched' \
-           or DitherPattern is 'alt_sched_rolling':
+           or DitherPattern is 'alt_sched_rolling' \
+           or DitherPattern is 'altsched_riswap' \
+           or DitherPattern is 'altsched_rolling_riswap':
             self.Maker = 'Daniel'
         elif DitherPattern is 'rolling_10yrs_opsim' \
             or DitherPattern is 'rolling_mis10yrs_opsim':
