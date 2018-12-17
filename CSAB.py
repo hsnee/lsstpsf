@@ -123,7 +123,7 @@ class ModelErrors():
         try:
             if objects_base == 'actual':
                 stars_pos = np.load('newcutnpys/'+self.OpsimRun+str(
-                                     object_year)+'.npy')
+                                     objects_base)+'.npy')
             elif objects_base == 'Y10':
                 stars_pos = np.load('newcutnpys/'+self.OpsimRun+'10.npy')
             else:
