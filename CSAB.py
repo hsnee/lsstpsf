@@ -113,6 +113,7 @@ class ModelErrors():
         self.ModelType = ModelType
         self.star_num = 50000
         self.bootstrap_iterations = 1000
+        self.size_error_ratio = 0.001
 
         if DitherPattern is 'alt_sched' \
                 or DitherPattern is 'alt_sched_rolling' \
@@ -378,8 +379,13 @@ class ModelErrors():
             )
         X, Y = [it[0][0] for it in itms], [it[0][1] for it in itms]
         de1, de2 = [it[1][0] for it in itms], [it[1][1] for it in itms]
-        psfe1, psfe2 = np.array([self.PSF.e[(x, y)] for x, y in zip(X, Y)]).swapaxes(1,0)
-        stare1, stare2 = np.array([self.STAR.e[(x, y)] for x, y in zip(X, Y)]).swapaxes(1,0)
+
+        psfe1, psfe2 = np.array(
+            [self.PSF.e[(x, y)] for x, y in zip(X, Y)]
+            ).swapaxes(1, 0)
+        stare1, stare2 = np.array(
+            [self.STAR.e[(x, y)] for x, y in zip(X, Y)]
+            ).swapaxes(1, 0)
 
         decat = tr.Catalog(g1=de1, g2=de2, ra=X, dec=Y,
                            ra_units='radians', dec_units='radians')
@@ -397,10 +403,9 @@ class ModelErrors():
         dedecorr.process(decat)
         dede_xip = dedecorr.xip
         dede_xim = dedecorr.xim
-        self.rho1_sigma = dedecorr.varxi**0.5
         self.r = np.exp(dedecorr.meanlogr)
+
         self.rho1 = dede_xip
-        self.rho1_im = dede_xim
 
         edecorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                    nbins=nbins, sep_units='degrees')
@@ -409,10 +414,6 @@ class ModelErrors():
         ede_xim = edecorr.xim
 
         self.rho2 = ede_xip
-        self.rho2_im = ede_xim
-        self.rho2_sigma = edecorr.varxi**0.5
-
-        self.size_error_ratio = 0.001
 
         edtedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                       nbins=nbins, sep_units='degrees')
@@ -421,8 +422,6 @@ class ModelErrors():
         edtedt_xim = edtedtcorr.xim * self.size_error_ratio**2
 
         self.rho3 = edtedt_xip
-        self.rho3_im = edtedt_xim
-        self.rho3_sigma = edtedtcorr.varxi**0.5 * self.size_error_ratio**2
 
         deedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                      nbins=nbins, sep_units='degrees')
@@ -431,8 +430,6 @@ class ModelErrors():
         deedt_xim = deedtcorr.xim * self.size_error_ratio
 
         self.rho4 = deedt_xip
-        self.rho4_im = deedt_xim
-        self.rho4_sigma = deedtcorr.varxi**0.5 * self.size_error_ratio
 
         eedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                     nbins=nbins, sep_units='degrees')
@@ -441,16 +438,12 @@ class ModelErrors():
         eedt_xim = eedtcorr.xim * self.size_error_ratio
 
         self.rho5 = eedt_xip
-        self.rho5_im = eedt_xim
-        self.rho5_sigma = eedtcorr.varxi**0.5 * self.size_error_ratio
 
         # star shape correlation:
         starcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                     nbins=nbins, sep_units='degrees')
         starcorr.process(starcat)
-        self.xip_sigma = starcorr.varxi**0.5
         self.xip = starcorr.xip
-        self.xim = starcorr.xim
 
     def rhos2errors(self):
         '''propagates rho statistics into shear errors
