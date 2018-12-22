@@ -352,6 +352,7 @@ class ModelErrors():
         self.M2e()
         print('finding rhos/errors '+str(self.bootstrap_iterations)+' times')
         for bootstrap_iteration in range(self.bootstrap_iterations):
+            print(bootstrap_iteration)
             self.getRhos()
             self.rhos2errors()
 
