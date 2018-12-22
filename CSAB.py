@@ -350,7 +350,7 @@ class ModelErrors():
             self.getModel(position_num=i)
         self.M2e()
         print('finding rhos/errors '+str(self.bootstrap_iterations)+' times')
-        for bootstrap_iteration in self.bootstrap_iterations:
+        for bootstrap_iteration in range(self.bootstrap_iterations):
             self.getRhos()
             self.rhos2errors()
 
@@ -371,17 +371,15 @@ class ModelErrors():
         '''method to get the rho statistics, needs a model,
         and traces for rhos 2 through 5.
         '''
-        print('finding rhos')
+        # print('finding rhos')
         seed = random.seed()
-        ditms = random.choices(
+        itms = random.choices(
             list(self.DELTA.e.items()), seed, k=self.star_num
             )
-        pitms = random.choice(
-            list(self.PSF.itms))
         X, Y = [it[0][0] for it in itms], [it[0][1] for it in itms]
-        de1, de2 = [it[1][0] for it in itms]
-        psfe1, psfe2 = [self.PSF.e[(x, y)] for x, y in zip(X, Y)]
-        stare1, stare2 = [self.STAR.e[(x, y)] for x, y in zip(X, Y)]
+        de1, de2 = [it[1][0] for it in itms], [it[1][1] for it in itms]
+        psfe1, psfe2 = np.array([self.PSF.e[(x, y)] for x, y in zip(X, Y)]).swapaxes(1,0)
+        stare1, stare2 = np.array([self.STAR.e[(x, y)] for x, y in zip(X, Y)]).swapaxes(1,0)
 
         decat = tr.Catalog(g1=de1, g2=de2, ra=X, dec=Y,
                            ra_units='radians', dec_units='radians')
