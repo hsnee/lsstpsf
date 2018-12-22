@@ -97,13 +97,14 @@ class ModelErrors():
         self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
         self.OpsimRun = OpsimRun
         self.random_seed = random.seed(random_seed)
+        self.rhoList = []
         if DitherPattern is 'alt_sched' \
-           or DitherPattern is 'alt_sched_rolling' \
-           or DitherPattern is 'altsched_riswap' \
-           or DitherPattern is 'altsched_rolling_riswap':
+                or DitherPattern is 'alt_sched_rolling' \
+                or DitherPattern is 'altsched_riswap' \
+                or DitherPattern is 'altsched_rolling_riswap':
             self.Maker = 'Daniel'
         elif DitherPattern is 'rolling_10yrs_opsim' \
-           or DitherPattern is 'rolling_mis10yrs_opsim':
+                or DitherPattern is 'rolling_mis10yrs_opsim':
             self.Maker = 'Peter'
         else:
             self.Maker = 'OpSim'
@@ -117,6 +118,7 @@ class ModelErrors():
         self.alpha = 0.01
         self.ModelType = ModelType
         self.star_num = 50000
+        self.bootstrap_iterations = 1000
         try:
             if objects_base == 'actual':
                 stars_pos = np.load('newcutnpys/'+self.OpsimRun+str(
@@ -341,8 +343,9 @@ class ModelErrors():
         for i in range(len(self.stars)):
             self.getModel(position_num=i)
         self.M2e()
-        self.getRhos()
-        self.rhos2errors()
+        for bootstrap_iteration in self.bootstrap_iterations:
+            self.getRhos()
+            self.rhos2errors()
 
     def unpack2XY(self, dictionaryitems):
         """Summary
@@ -362,10 +365,16 @@ class ModelErrors():
         and traces for rhos 2 through 5.
         '''
         print('finding rhos')
-        X, Y = self.unpack2XY(self.DELTA.e.keys())
-        de1, de2 = self.unpack2XY(self.DELTA.e.values())
-        psfe1, psfe2 = self.unpack2XY(self.PSF.e.values())
-        stare1, stare2 = self.unpack2XY(self.STAR.e.values())
+        seed = random.seed()
+        ditms = random.choices(
+            list(self.DELTA.e.items()), seed, k=self.star_num
+            )
+        pitms = random.choice(
+            list(self.PSF.itms))
+        X, Y = [it[0][0] for it in itms], [it[0][1] for it in itms]
+        de1, de2 = [it[1][0] for it in itms]
+        psfe1, psfe2 = [self.PSF.e[(x, y)] for x, y in zip(X, Y)]
+        stare1, stare2 = [self.STAR.e[(x, y)] for x, y in zip(X, Y)]
 
         decat = tr.Catalog(g1=de1, g2=de2, ra=X, dec=Y,
                            ra_units='radians', dec_units='radians')
@@ -442,20 +451,14 @@ class ModelErrors():
         '''propagates rho statistics into shear errors
         '''
 
-        self.delta_xip = 2 * self.size_error_ratio*self.trace_ratio * self.xip\
+        delta_xip = 2 * self.size_error_ratio*self.trace_ratio * self.xip\
             + (self.trace_ratio)**2 * self.rho1\
             - self.alpha * (self.trace_ratio) * self.rho2\
             + (self.trace_ratio)**2 * self.rho3\
             + (self.trace_ratio)**2 * self.rho4\
             - self.alpha * (self.trace_ratio) * self.rho5
 
-        self.delta_xip_sigma = np.sqrt(
-         self.trace_ratio**4 * self.rho1_sigma**2
-         + self.alpha**2 * self.trace_ratio**2 * self.rho2_sigma**2
-         + 4*self.size_error_ratio**2 * self.trace_ratio**2 * self.xip_sigma**2
-         + self.trace_ratio**4 * self.rho3_sigma**2
-         + self.trace_ratio**4 * self.rho4_sigma**2
-         + self.alpha**2 * self.trace_ratio**2 * self.rho5_sigma**2)
+        self.rhoList.append(delta_xip)
 
     def getModel(self, position_num):
         '''method to create a radial pattern (one of the simplified models),
@@ -571,11 +574,6 @@ class ModelErrors():
         psfe1 = stare1/1.03
         psfe2 = stare2/1.03
         return stare1, stare2, psfe1, psfe2
-
-    def getErrorBars(self):
-        for bootstrapIteration in range(10000):
-            
-            return
 
     def getRequirements(self):
         '''Getting requirements on rhos and xi_+ from HSC data.
