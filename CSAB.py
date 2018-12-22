@@ -78,7 +78,8 @@ class ModelErrors():
     """
 
     def __init__(self, ModelType, DitherPattern,
-                 rotDithers, OpsimRun, objects_base, year):
+                 rotDithers, OpsimRun, objects_base,
+                 year, random_seed=1000):
         """Summary
 
         Args:
@@ -95,18 +96,14 @@ class ModelErrors():
         """
         self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
         self.OpsimRun = OpsimRun
-        # if "minion" in self.OpsimRun:
-        #     self.rundate = 'old'
-        # else:
-        #     self.rundate = 'new'
-
+        self.random_seed = random.seed(random_seed)
         if DitherPattern is 'alt_sched' \
            or DitherPattern is 'alt_sched_rolling' \
            or DitherPattern is 'altsched_riswap' \
            or DitherPattern is 'altsched_rolling_riswap':
             self.Maker = 'Daniel'
         elif DitherPattern is 'rolling_10yrs_opsim' \
-            or DitherPattern is 'rolling_mis10yrs_opsim':
+           or DitherPattern is 'rolling_mis10yrs_opsim':
             self.Maker = 'Peter'
         else:
             self.Maker = 'OpSim'
@@ -137,10 +134,9 @@ class ModelErrors():
                 stars_pos = np.load('/global/cscratch1/sd/husni/OpsimRuns/'
                                     + self.OpsimRun + '.npy')
 
-        # MINION LEGACY
-        # stars_pos = np.load('objs/'+DitherPattern[0:-6]+'.npy')
-
-        self.stars = np.array(random.sample(list(stars_pos), self.star_num))
+        self.stars = np.array(random.choices(list(stars_pos),
+                                             self.random_seed,
+                                             k=self.star_num))
         self.DELTA.e = defaultdict(np.array)
         self.DELTA.M = defaultdict(np.array)
         self.STAR.M = defaultdict(np.array)
@@ -159,14 +155,10 @@ class ModelErrors():
             'hex_visit': 'hexDitherFieldPerVisit',
             'field': 'field'
         }
-        # MINION LEGACY if self.rundate == 'new':
 
         fieldidcolumn = 'fieldId'
         deg = True
 
-        # MINION LEGACY else:
-        	# MINION LEGACY   fieldidcolumn = 'fieldID'
-        	# MINION LEGACY   deg = False
         self.Stackers = {
          'random_night': stackers.RandomDitherFieldPerNightStacker(
                                         fieldIdCol=fieldidcolumn, degrees=deg),
@@ -193,7 +185,9 @@ class ModelErrors():
             self.Stacker = [self.Stackers[DitherPattern]]
         self.rotDitherPattern = rotDithers
         if rotDithers is True:
-            self.Stacker.append(stackers.RandomRotDitherPerFilterChangeStacker())
+            self.Stacker.append(
+                stackers.RandomRotDitherPerFilterChangeStacker()
+                )
 
         self.savedStarsAngles = {tuple(k): [0] for k in self.stars}
 
@@ -234,7 +228,6 @@ class ModelErrors():
 
             posRA = opsdb.fetchMetricData(['fieldRA'])
             posDec = opsdb.fetchMetricData(['fieldDec'])
-            # MINION LEGACY if minion not in self.OpsimRun
             posRA = np.array([pos[0]*np.radians(1) for pos in posRA])
             posDec = np.array([pos[0]*np.radians(1) for pos in posDec])
             filters = opsdb.fetchMetricData(['filter'])
@@ -263,7 +256,6 @@ class ModelErrors():
         if self.Stacker[0] is None:
             self.Stacker = self.Stacker[1:]
 
-        # MINION LEGACY if 'minion' not in self.OpsimRun and
         if self.Maker is 'OpSim':
             outDir = 'temp'
             myBundles = {}
@@ -297,37 +289,6 @@ class ModelErrors():
                                                      resultsDb=resultsDb)
             bgroup.runAll()
 
-        # MINION LEGACY
-            # elif 'minion' in self.OpsimRun:
-            #    print("old sims")
-            #    opsdb = db.OpsimDatabaseV3(self.runName + '_sqlite.db')
-            #    outDir = 'dither_test'
-            #    resultsDb = db.ResultsDb(outDir=outDir)
-            #    if self.DitherPattern=='field':
-            #        slicer = slicers.HealpixSlicer(nside=64,
-            #                 lonCol='fieldRA', latCol='fieldDec', latLonDeg=False)
-            #    else:
-            #        slicer = slicers.HealpixSlicer(nside=64,
-            #                 lonCol=self.DitherPattern+'Ra',
-            #                 latCol=self.DitherPattern+'Dec', latLonDeg=False)
-            #    sqlconstraint = sqlWhere
-            #    metric = metrics.CountMetric(col='night')
-            #
-            #    bundle = metricBundles.MetricBundle(metric, slicer,
-            #                  sqlconstraint, runName=self.runName,
-            #                  stackerList=self.Stacker)
-            #    bgroup = metricBundles.MetricBundleGroup(
-            #                  {self.DitherPattern+' dither':bundle},
-            #                  opsdb, outDir=outDir, resultsDb=resultsDb)
-            #    bgroup.runAll()
-
-            # if 'feature' in self.OpsimRun:
-            #     if self.objects_base == 'actual' and self.year == 1:
-            #       print('year1')
-            #       posRA, posDec = np.load('simruns/feature_baseline_y1.npy')
-            #     else:
-            #       print('year10')
-            #       posRA, posDec = np.load('simruns/feature_baseline.npy')
             if self.DitherPattern == 'field':
                 posRA = bgroup.simData['fieldRA']
                 posDec = bgroup.simData['fieldDec']
@@ -336,16 +297,11 @@ class ModelErrors():
                 posDec = bgroup.simData[self.DitherPattern+'Dec']
             pos = np.array((posRA, posDec))
 
-            # ONLY NON MINION
             pos *= np.radians(1)
             self.positions = pos.swapaxes(1, 0)
 
-        # DITHERING try:
+        # ROTATIONAL DITHERING try:
         #    print('getting random rotational dithers')
-        #    # if np.logical_and(self.DitherPattern == 'field',
-        #    #                   'minion' in self.OpsimRun):
-        #    #     self.rotTelPos = np.zeros(len(bgroup.simData['fieldDec']))
-        #    # else:
         #    self.rotTelPos = np.random.uniform(
         #            -np.pi/2, np.pi/2,
         #            len(bgroup.simData['fieldDec'])
@@ -417,6 +373,7 @@ class ModelErrors():
                             ra_units='radians', dec_units='radians')
         starcat = tr.Catalog(g1=stare1, g2=stare2, ra=X, dec=Y,
                              ra_units='radians', dec_units='radians')
+
         min_sep = 0.01  # in degrees
         max_sep = 10  # in degrees
         nbins = 24  # number of bins
@@ -615,26 +572,30 @@ class ModelErrors():
         psfe2 = stare2/1.03
         return stare1, stare2, psfe1, psfe2
 
+    def getErrorBars(self):
+        for bootstrapIteration in range(10000):
+            
+            return
 
-def getRequirements():
-    '''Getting requirements on rhos and xi_+ from HSC data.
+    def getRequirements(self):
+        '''Getting requirements on rhos and xi_+ from HSC data.
 
-    Returns:
-        TYPE: Description
-    '''
+        Returns:
+            TYPE: Description
+        '''
 
-    HSCCosmicShear = np.loadtxt(
-        'HSCS16A_combinedarea_1000rea_full_xi_p.mean_sqrtvar')
-    reqs_r = arcm2r(1)*HSCCosmicShear[:, 0]
-    HSCCosmicShear_xip = HSCCosmicShear[:, 1]/2.6
-    rho_reqs = np.loadtxt('rho_requirements.txt')
-    lsst_area = 18000.  # in degrees
-    hsc_area = 136.  # in degrees
-    rho25_reqs = 0.02/self.alpha * np.sqrt(hsc_area/lsst_area) * \
-        rho_reqs[:, 2]/(self.trace_ratio)**2
-    rho134_reqs = np.sqrt(hsc_area/lsst_area) * \
-        rho_reqs[:, 1]/(self.trace_ratio)
-    return reqs_r, rho25_reqs
+        HSCCosmicShear = np.loadtxt(
+            'HSCS16A_combinedarea_1000rea_full_xi_p.mean_sqrtvar')
+        reqs_r = arcm2r(1)*HSCCosmicShear[:, 0]
+        HSCCosmicShear_xip = HSCCosmicShear[:, 1]/2.6
+        rho_reqs = np.loadtxt('rho_requirements.txt')
+        lsst_area = 18000.  # in degrees
+        hsc_area = 136.  # in degrees
+        rho25_reqs = 0.02/self.alpha * np.sqrt(hsc_area/lsst_area) * \
+            rho_reqs[:, 2]/(self.trace_ratio)**2
+        rho134_reqs = np.sqrt(hsc_area/lsst_area) * \
+            rho_reqs[:, 1]/(self.trace_ratio)
+        return reqs_r, rho25_reqs
 
 
 def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
@@ -669,7 +630,7 @@ def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
         proposal_format = 'none'
     elif OpsimRun == 'pontus_2502':
         proposal_format = 'pontus_2502'
-    else: 
+    else:
         proposal_format = 'default'
     if proposal_format == 'default':
         sqlWhere = 'night < '+str(nightsNum)+' and \
