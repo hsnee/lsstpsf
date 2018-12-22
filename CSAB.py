@@ -614,11 +614,14 @@ class ModelErrors():
         return reqs_r, rho134_reqs
 
 
-def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
-                           objects_base, overwrite=False):
+def getCounterAndDeltaXips(model,
+                           year,
+                           DitherPattern,
+                           OpsimRun,
+                           rotDithers,
+                           objects_base='Y10'):
     """
     Args:
-        n (int): number of times this functions should run
         model (str): 'radial' or 'horizontal'
         year (int): year of survey
         DitherPattern (str): 'field', 'spiral', 'hexagonal' or 'random'
@@ -627,7 +630,6 @@ def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
         objects_base (str): year for making cut on objects 'Y10' or 'actual'
         proposal_format (str): 'default uses a proposalDict with values
                                representing'
-        overwrite (bool, optional): overwrite results. False appends instead
 
     Returns:
         dict: the distribution of visits per object
@@ -661,44 +663,17 @@ def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
         raise ValueError('Cannot understand proposal_format')
     directory = 'newcutnpys/'
     outName = directory+OpsimRun+DitherPattern+str(year)+'.npy'
-    if overwrite is False:
-        delta_xips = np.load(outName)
-        for i in range(n):
-            errors_object = ModelErrors(ModelType=model,
-                                        DitherPattern=DitherPattern,
-                                        OpsimRun=OpsimRun,
-                                        rotDithers=rotDithers,
-                                        year=year,
-                                        objects_base=objects_base)
-            errors_object.process(sqlWhere)
-            countersDict[OpsimRun] = errors_object.counter
-            delta_xips = np.vstack((delta_xips, errors_object.delta_xip))
-            np.save(outName, delta_xips)
 
-    else:
-        print(OpsimRun)
-        errors_object = ModelErrors(ModelType=model,
-                                    DitherPattern=DitherPattern,
-                                    OpsimRun=OpsimRun,
-                                    rotDithers=rotDithers,
-                                    year=year,
-                                    objects_base=objects_base)
-        errors_object.process(sqlWhere)
-        countersDict[OpsimRun] = errors_object.counter
-        np.save(outName, errors_object.delta_xip)
-        if n > 1:
-            delta_xips = np.load(outName)
-            for i in n-1:
-                errors_object = ModelErrors(ModelType=model,
-                                            DitherPattern=DitherPattern,
-                                            OpsimRun=OpsimRun,
-                                            rotDithers=rotDithers,
-                                            year=year,
-                                            objects_base=objects_base)
-                errors_object.process(sqlWhere)
-                countersDict[OpsimRun] = errors_object.counter
-                delta_xips = np.vstack((delta_xips, errors_object.delta_xip))
-                np.save(outName, delta_xips)
+    print('analysing'+OpsimRun)
+    errors_object = ModelErrors(ModelType=model,
+                                DitherPattern=DitherPattern,
+                                OpsimRun=OpsimRun,
+                                rotDithers=rotDithers,
+                                year=year,
+                                objects_base=objects_base)
+    errors_object.process(sqlWhere)
+    countersDict[OpsimRun] = errors_object.counter
+    np.save(outName, errors_object.xipList)
 
     return countersDict
     print('there are now {} runs total for this strategy'.format(
