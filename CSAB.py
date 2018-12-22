@@ -43,36 +43,38 @@ class ModelErrors():
         OpsimRun (str): name of opsim run database, without extension
         positions (ndarray): positions of objects to observe
         pvalues (list): Description
-        r (ndarray): Description
-        rho1 (TYPE): Description
-        rho1_im (TYPE): Description
-        rho1_sigma (TYPE): Description
-        rho2 (TYPE): Description
-        rho2_im (TYPE): Description
-        rho2_sigma (TYPE): Description
-        rho3 (TYPE): Description
-        rho3_im (TYPE): Description
-        rho3_sigma (TYPE): Description
-        rho4 (TYPE): Description
-        rho4_im (TYPE): Description
-        rho4_sigma (TYPE): Description
-        rho5 (TYPE): Description
-        rho5_im (TYPE): Description
-        rho5_sigma (TYPE): Description
+        r (ndarray): log(theta) for angles to calculate correlations at.
+        rho1 (ndarray): rho statistic
+        rho1_im (ndarray): rho statistic imaginary part
+        rho1_sigma (ndarray): rho statistic std
+        rho2 (ndarray): rho statistic
+        rho2_im (ndarray): rho statistic
+        rho2_sigma (ndarray): rho statistic std
+        rho3 (ndarray): rho statistic
+        rho3_im (ndarray): rho statistic
+        rho3_sigma (ndarray): rho statistic std
+        rho4 (ndarray): rho statistic
+        rho4_im (ndarray): rho statistic
+        rho4_sigma (ndarray): rho statistic std
+        rho5 (ndarray): rho statistic
+        rho5_im (ndarray): rho statistic
+        rho5_sigma (ndarray): rho statistic std
         rotDitherPattern (TYPE): Description
-        rotTelPos (TYPE): Description
+        rotTelPos (TYPE): telescope angles to use for rotational dithering.
         runName (str): name of opsim run including directory, without ext
-        savedStarsAngles (TYPE): Description
+        savedStarsAngles (dict): keys representing star positions and values
+                                 representing the angle distribution
+                                 to FOV centers
         sigma (TYPE): Description
         size_error_ratio (float): Description
-        Stacker (TYPE): Description
-        Stackers (TYPE): Description
+        Stacker (method): Description
+        Stackers (dict): Description
         star_num (int): Description
         stars (TYPE): Description
         trace_ratio (float): Description
         TrM (float): 2nd ellipticity moment trace
-        xim (TYPE): Description
-        xip (TYPE): Description
+        xim (ndarray): Description
+        xip (ndarray): Description
         xip_sigma (TYPE): Description
         year (str): year of survey
     """
@@ -83,31 +85,23 @@ class ModelErrors():
         """Summary
 
         Args:
-            ModelType (TYPE): Description
-            DitherPattern (TYPE): Description
-            Maker (TYPE): Description
-            rotDithers (TYPE): Description
-            OpsimRun (TYPE): Description
-            objects_base (TYPE): Description
-            year (TYPE): Description
+            ModelType (str): residual model: 'radial' or 'horizontal'
+            DitherPattern (str): usually 'random_visit', look for
+                                 self.Stackers for a full list.
+            rotDithers (bool): Whether to use rotational dithers or not.
+            OpsimRun (str): the name of the OpSim run, without path or .db.
+            objects_base (str): depth cut made based on 'Y10' or 'actual' year.
+            year (int): considers the survey up to this year,
+                        must be between [1, 10].
 
         Raises:
-            ValueError: Description
+            ValueError: if objects base not in {'Y10', 'actual'}
+            FileNotFoundError: if file containing star positions is not found
         """
         self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
         self.OpsimRun = OpsimRun
         self.random_seed = random.seed(random_seed)
-        self.rhoList = []
-        if DitherPattern is 'alt_sched' \
-                or DitherPattern is 'alt_sched_rolling' \
-                or DitherPattern is 'altsched_riswap' \
-                or DitherPattern is 'altsched_rolling_riswap':
-            self.Maker = 'Daniel'
-        elif DitherPattern is 'rolling_10yrs_opsim' \
-                or DitherPattern is 'rolling_mis10yrs_opsim':
-            self.Maker = 'Peter'
-        else:
-            self.Maker = 'OpSim'
+        self.xipList = []
         self.fwhm = 0.7  # arcsec
         self.sigma = self.fwhm/(2*np.sqrt(2*np.log(2)))
         self.TrM = 2*self.sigma**2
@@ -119,6 +113,18 @@ class ModelErrors():
         self.ModelType = ModelType
         self.star_num = 50000
         self.bootstrap_iterations = 1000
+
+        if DitherPattern is 'alt_sched' \
+                or DitherPattern is 'alt_sched_rolling' \
+                or DitherPattern is 'altsched_riswap' \
+                or DitherPattern is 'altsched_rolling_riswap':
+            self.Maker = 'Daniel'
+        elif DitherPattern is 'rolling_10yrs_opsim' \
+                or DitherPattern is 'rolling_mis10yrs_opsim':
+            self.Maker = 'Peter'
+        else:
+            self.Maker = 'OpSim'
+
         try:
             if objects_base == 'actual':
                 stars_pos = np.load('newcutnpys/'+self.OpsimRun+str(
@@ -185,6 +191,7 @@ class ModelErrors():
         else:
             self.DitherPattern = self.DitherPatterns[DitherPattern]
             self.Stacker = [self.Stackers[DitherPattern]]
+
         self.rotDitherPattern = rotDithers
         if rotDithers is True:
             self.Stacker.append(
@@ -192,7 +199,6 @@ class ModelErrors():
                 )
 
         self.savedStarsAngles = {tuple(k): [0] for k in self.stars}
-
         self.year = year
 
     class PSF:
@@ -336,13 +342,14 @@ class ModelErrors():
         '''runs all analysis methods
 
         Args:
-            sqlWhere (TYPE): Description
+            sqlWhere (str): SQL query for the database.
         '''
         self.getPositions(sqlWhere)
         print('creating the models at every dither, this will take a while')
         for i in range(len(self.stars)):
             self.getModel(position_num=i)
         self.M2e()
+        print('finding rhos/errors '+str(self.bootstrap_iterations)+' times')
         for bootstrap_iteration in self.bootstrap_iterations:
             self.getRhos()
             self.rhos2errors()
@@ -458,7 +465,7 @@ class ModelErrors():
             + (self.trace_ratio)**2 * self.rho4\
             - self.alpha * (self.trace_ratio) * self.rho5
 
-        self.rhoList.append(delta_xip)
+        self.xipList.append(delta_xip)
 
     def getModel(self, position_num):
         '''method to create a radial pattern (one of the simplified models),
@@ -467,10 +474,11 @@ class ModelErrors():
         at which it would be visible -- then
 
         Args:
-            position_num (TYPE): Description
+            position_num (int): the dither position to consider
 
         Returns:
-            TYPE: Description
+            None: records results in self.counter,
+                  self.STAR.M, self.PSF.M, self.DELTA.M.
         '''
         star_pos = self.stars[position_num]
         cond = angularSeparation(
@@ -535,11 +543,15 @@ class ModelErrors():
         """Summary
 
         Args:
-            star_pos (TYPE): Description
-            innerDithers (TYPE): Description
+            star_pos (tuple): (ra, dec) positions for stars to consider
+            innerDithers (tuple): (ra, dec) positions for dithers
+                                  that can see the star
 
         Returns:
-            TYPE: Description
+            stare1: e1 ellipticity for truth
+            stare2: e2 ellipticity for truth
+            psfe1: e1 ellipticity for the PSF
+            psfe2: e2 ellipticity for the PSF
         """
         r = angularSeparation(
             star_pos[0]*np.degrees(1), star_pos[1]*np.degrees(1),
@@ -562,12 +574,17 @@ class ModelErrors():
         and the residual is 3%.
 
         Args:
-            star_pos (TYPE): Description
-            innerDithers (TYPE): Description
-            rotDithers (TYPE): Description
+            star_pos (tuple): (ra, dec) positions for stars to consider
+            innerDithers (list of tuples): (ra, dec) positions for dithers
+                                           that can see the star
+            rotDithers (list of tuples): angles for dither positions
+                                         that can see the star
 
         Returns:
-            TYPE: Description
+            stare1: e1 ellipticity for truth
+            stare2: e2 ellipticity for truth
+            psfe1: e1 ellipticity for the PSF
+            psfe2: e2 ellipticity for the PSF
         '''
         stare1 = np.cos(2*rotDithers)/5
         stare2 = np.sin(2*rotDithers)/5
@@ -579,7 +596,10 @@ class ModelErrors():
         '''Getting requirements on rhos and xi_+ from HSC data.
 
         Returns:
-            TYPE: Description
+            reqs_r (ndarray): theta seperations where
+                              requirements are computed.
+            rho134_reqs (ndarray): requirements on rho1, 3 and 4.
+            rho25_reqs (ndarray): requirements on rho 2 and 5.
         '''
 
         HSCCosmicShear = np.loadtxt(
@@ -593,7 +613,7 @@ class ModelErrors():
             rho_reqs[:, 2]/(self.trace_ratio)**2
         rho134_reqs = np.sqrt(hsc_area/lsst_area) * \
             rho_reqs[:, 1]/(self.trace_ratio)
-        return reqs_r, rho25_reqs
+        return reqs_r, rho134_reqs
 
 
 def getCounterAndDeltaXips(n, model, year, DitherPattern, OpsimRun, rotDithers,
