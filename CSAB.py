@@ -509,7 +509,7 @@ class ModelErrors():
         angles = np.array(
             [r2d(0.5*np.arctan2(e2, e1)) for e2, e1 in zip(stare2, stare1)]
             )
-        # self.savedStarsAngles[star_pos] = angles
+        self.savedStarsAngles[star_pos] = angles
 
         deltaMxx = starMxx - psfMxx
         deltaMxy = starMxy - psfMxy
