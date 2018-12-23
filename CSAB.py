@@ -60,7 +60,7 @@ class ModelErrors():
         rho5_im (ndarray): rho statistic
         rho5_sigma (ndarray): rho statistic std
         rotDitherPattern (TYPE): Description
-        rotTelPos (TYPE): telescope angles to use for rotational dithering.
+        rotTelPos (ndarray): telescope angles to use for rotational dithering.
         runName (str): name of opsim run including directory, without ext
         savedStarsAngles (dict): keys representing star positions and values
                                  representing the angle distribution
@@ -73,9 +73,7 @@ class ModelErrors():
         stars (TYPE): Description
         trace_ratio (float): Description
         TrM (float): 2nd ellipticity moment trace
-        xim (ndarray): Description
-        xip (ndarray): Description
-        xip_sigma (TYPE): Description
+        xip (ndarray): xi+
         year (str): year of survey
     """
 
@@ -112,7 +110,7 @@ class ModelErrors():
         self.alpha = 0.01
         self.ModelType = ModelType
         self.star_num = 50000
-        self.bootstrap_iterations = 1000
+        self.bootstrap_iterations = 300
         self.size_error_ratio = 0.001
 
         if DitherPattern is 'alt_sched' \
@@ -352,7 +350,6 @@ class ModelErrors():
         self.M2e()
         print('finding rhos/errors '+str(self.bootstrap_iterations)+' times')
         for bootstrap_iteration in range(self.bootstrap_iterations):
-            print(bootstrap_iteration)
             self.getRhos()
             self.rhos2errors()
 
@@ -635,7 +632,7 @@ def getCounterAndDeltaXips(model,
                     'colossus_2667': 1, 'kraken_2026': 3, 'kraken_2035': 3,
                     'kraken_2036': 3, 'kraken_2042': 2, 'kraken_2044': 1,
                     'mothra_2045': 1, 'nexus_2097': 1, 'pontus_2002': 1,
-                    'pontus_2489': 3, 'pontus_2502': 2}
+                    'pontus_2489': 3, 'pontus_2502': 2, 'pontus_2579': 3}
     countersDict = {}
     nightsNum = year*365
     if OpsimRun not in list(proposalDict.keys()):
@@ -668,10 +665,9 @@ def getCounterAndDeltaXips(model,
     errors_object.process(sqlWhere)
     countersDict[OpsimRun] = errors_object.counter
     np.save(outName, errors_object.xipList)
-
-    return countersDict
     print('there are now {} runs total for this strategy'.format(
                                                 len(np.load(outName))))
+    return countersDict
 
 
 def getPositions(runName, year):
@@ -679,7 +675,7 @@ def getPositions(runName, year):
                     'colossus_2667': 1, 'kraken_2026': 3, 'kraken_2035': 3,
                     'kraken_2036': 3, 'kraken_2042': 2, 'kraken_2044': 1,
                     'mothra_2045': 1, 'nexus_2097': 1, 'pontus_2002': 1,
-                    'pontus_2489': 3, 'pontus_2502': 2}
+                    'pontus_2489': 3, 'pontus_2502': 2, 'pontus_2579': 3}
     directory = '/global/cscratch1/sd/husni/OpsimRuns/'
     nights = year*365 + 1
     opsdb = db.OpsimDatabase(directory+runName+'.db')
