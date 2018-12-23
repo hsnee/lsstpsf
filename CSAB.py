@@ -667,7 +667,7 @@ def getCounterAndDeltaXips(model,
     np.save(outName, errors_object.xipList)
     print('there are now {} runs total for this strategy'.format(
                                                 len(np.load(outName))))
-    return countersDict
+    return countersDict, errors_object
 
 
 def getPositions(runName, year):
