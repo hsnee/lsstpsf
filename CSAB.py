@@ -491,7 +491,7 @@ class ModelErrors():
             return
 
         if self.rotDitherPattern is True:
-            rotDithers = self.rotTelPos
+            rotDithers = self.rotTelPos[cond]
         else:
             pass
 
