@@ -192,10 +192,10 @@ class ModelErrors():
             self.Stacker = [self.Stackers[DitherPattern]]
 
         self.rotDitherPattern = rotDithers
-        if rotDithers is True:
-            self.Stacker.append(
-                stackers.RandomRotDitherPerFilterChangeStacker()
-                )
+        # if rotDithers is True:
+        #     self.Stacker.append(
+        #         stackers.RandomRotDitherPerFilterChangeStacker()
+        #         )
 
         self.savedStarsAngles = {tuple(k): [] for k in self.stars}
         self.year = year
@@ -485,9 +485,9 @@ class ModelErrors():
         if len(innerDithers) < 2:
             return
 
-        try:
+        if self.rotDitherPattern is True:
             rotDithers = self.rotTelPos[cond]
-        except TypeError:
+        else:
             pass
 
         if self.ModelType == 'radial':
@@ -657,7 +657,7 @@ def getCounterAndDeltaXips(model,
     else:
         raise ValueError('Cannot understand proposal_format')
     directory = 'newcutnpys/'
-    outName = directory+OpsimRun+DitherPattern+str(year)+'.npy'
+    outName = directory+OpsimRun+DitherPattern+rotDithers+str(year)+'.npy'
 
     print('analysing'+OpsimRun)
     errors_object = ModelErrors(ModelType=model,
