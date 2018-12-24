@@ -233,14 +233,16 @@ class ModelErrors():
 
             opsdb = db.OpsimDatabase(self.runName+'.db')
 
-            posRA = opsdb.fetchMetricData(['fieldRA'])
-            posDec = opsdb.fetchMetricData(['fieldDec'])
+            data = opsdb.fetchMetricData(['fieldRA', 'fieldDec',
+                                          'filter', 'night'])
+
+            posRA = data['fieldRA']
+            posDec = data['fieldDec']
             posRA = np.array([pos[0]*np.radians(1) for pos in posRA])
             posDec = np.array([pos[0]*np.radians(1) for pos in posDec])
-            filters = opsdb.fetchMetricData(['filter'])
-            filters = np.array([fil[0] for fil in filters])
-            nights = opsdb.fetchMetricData(['night'])
-            nights = np.array([n[0] for n in nights])
+            filters = data['filter']
+            nights = data['night']
+
             if self.Maker is 'Peter':
                 notes = opsdb.fetchMetricData(['note'])
                 ddf_cond = ['DD' not in (
@@ -310,6 +312,7 @@ class ModelErrors():
         # ROTATIONAL DITHERING
         if self.rotDitherPattern is True:
             print('getting random rotational dithers')
+            data = opsdb.fetchMetricData(['filter'])
             filters = data['filter']
             groupedFilters = [
                     (
