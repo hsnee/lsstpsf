@@ -657,7 +657,7 @@ def getCounterAndDeltaXips(model,
     else:
         raise ValueError('Cannot understand proposal_format')
     directory = 'newcutnpys/'
-    outName = directory+OpsimRun+DitherPattern+rotDithers+str(year)+'.npy'
+    outName = directory+OpsimRun+DitherPattern+str(rotDithers)+str(year)+'.npy'
 
     print('analysing'+OpsimRun)
     errors_object = ModelErrors(ModelType=model,
