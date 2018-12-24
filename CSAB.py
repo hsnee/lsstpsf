@@ -9,6 +9,7 @@ import lsst.sims.maf.metricBundles as metricBundles
 import lsst.sims.maf.db as db
 import random
 from lsst.sims.utils import angularSeparation
+from itertools import groupby
 
 
 def arcm2r(theta):
