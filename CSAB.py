@@ -334,7 +334,7 @@ class ModelErrors():
             for j in d:
                 self.rotTelPos = self.rotTelPos + \
                     [np.random.uniform(-90, 90)]*j[1]
-                self.rotTelPos = np.array(self.rotTelPos)
+            self.rotTelPos = np.array(self.rotTelPos)
         else:
             print('not using rotational dithering')
             self.rotTelPos = None
