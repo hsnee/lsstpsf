@@ -313,7 +313,7 @@ class ModelErrors():
         # ROTATIONAL DITHERING
         if self.rotDitherPattern is True:
             print('getting random rotational dithers')
-            data = opsdb.fetchMetricData(['filter'])
+            data = opsdb.fetchMetricData(['filter'], sqlconstraint=sqlWhere)
             filters = data['filter']
             groupedFilters = [
                     (
@@ -491,7 +491,7 @@ class ModelErrors():
             return
 
         if self.rotDitherPattern is True:
-            rotDithers = self.rotTelPos[cond]
+            rotDithers = self.rotTelPos
         else:
             pass
 
