@@ -197,7 +197,7 @@ class ModelErrors():
                 stackers.RandomRotDitherPerFilterChangeStacker()
                 )
 
-        self.savedStarsAngles = {tuple(k): [0] for k in self.stars}
+        self.savedStarsAngles = {tuple(k): [] for k in self.stars}
         self.year = year
 
     class PSF:
@@ -307,15 +307,32 @@ class ModelErrors():
             pos *= np.radians(1)
             self.positions = pos.swapaxes(1, 0)
 
-        # ROTATIONAL DITHERING try:
-        #    print('getting random rotational dithers')
-        #    self.rotTelPos = np.random.uniform(
-        #            -np.pi/2, np.pi/2,
-        #            len(bgroup.simData['fieldDec'])
-        #            )
-        # except:
-        print('not using rotational dithering')
-        self.rotTelPos = None
+        # ROTATIONAL DITHERING
+        if self.rotDitherPattern is True:
+            print('getting random rotational dithers')
+            filters = data['filter']
+            groupedFilters = [
+                    (
+                      filt, len(list(occurence))
+                    ) for filt, occurence in groupby(filters)
+                ]
+
+            d = []
+            cutoff = 1440
+            for j in groupedFilters:
+                if j[1] <= cutoff:
+                    d.append(j)
+                else:
+                    d = d + [(j[0], cutoff)]*(j[1]//cutoff)
+                    d.append((j[0], j[1] % cutoff))
+
+            self.rotTelPos = []
+            for j in d:
+                self.rotTelPos = self.rotTelPos + \
+                    [np.random.uniform(-90, 90)]*j[1]
+        else:
+            print('not using rotational dithering')
+            self.rotTelPos = None
         print('Summary: we are using the OpsimRun at {}, \
                with the translational dither pattern: {}. \
                Rotation: {}'.format(self.runName,
@@ -352,19 +369,6 @@ class ModelErrors():
         for bootstrap_iteration in range(self.bootstrap_iterations):
             self.getRhos()
             self.rhos2errors()
-
-    def unpack2XY(self, dictionaryitems):
-        """Summary
-
-        Args:
-            dictionaryitems (TYPE): Description
-
-        Returns:
-            TYPE: Description
-        """
-        return map(lambda i: np.array([key[i] for key in dictionaryitems]),
-                   (0, 1)
-                   )
 
     def getRhos(self):
         '''method to get the rho statistics, needs a model,
@@ -559,7 +563,7 @@ class ModelErrors():
 
     def HorizontalModel(self, star_pos, innerDithers, rotDithers):
         '''Summary
-        this method creates a horizontal model model of e_psf = 0.6
+        this method creates a horizontal model model of e_psf = 0.06
         and the residual is 3%.
 
         Args:
