@@ -617,7 +617,8 @@ def getCounterAndDeltaXips(model,
                            DitherPattern,
                            OpsimRun,
                            rotDithers,
-                           objects_base='Y10'):
+                           objects_base='Y10',
+                           random_seed=1000):
     """
     Args:
         model (str): 'radial' or 'horizontal'
@@ -668,7 +669,9 @@ def getCounterAndDeltaXips(model,
                                 OpsimRun=OpsimRun,
                                 rotDithers=rotDithers,
                                 year=year,
-                                objects_base=objects_base)
+                                objects_base=objects_base,
+                                random_seed=random_seed
+                                )
     errors_object.process(sqlWhere)
     countersDict[OpsimRun] = errors_object.counter
     np.save(outName, errors_object.xipList)
