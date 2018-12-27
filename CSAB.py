@@ -152,8 +152,6 @@ class ModelErrors():
         self.PSF.M = defaultdict(np.array)
         self.PSF.e = defaultdict(np.array)
         self.counter = defaultdict(int)
-        self.ksstatistic = []
-        self.pvalues = []
         self.DitherPatterns = {
             'random_night': 'randomDitherFieldPerNight',
             'random_visit': 'randomDitherFieldPerVisit',
@@ -584,8 +582,8 @@ class ModelErrors():
             psfe1: e1 ellipticity for the PSF
             psfe2: e2 ellipticity for the PSF
         '''
-        stare1 = np.cos(2*rotDithers)/5
-        stare2 = np.sin(2*rotDithers)/5
+        stare1 = np.cos(2*rotDithers)/100
+        stare2 = np.sin(2*rotDithers)/100
         psfe1 = stare1/1.03
         psfe2 = stare2/1.03
         return stare1, stare2, psfe1, psfe2
