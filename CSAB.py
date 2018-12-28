@@ -110,7 +110,7 @@ class ModelErrors():
         self.FOVradius = 1.75  # degrees
         self.alpha = 0.01
         self.ModelType = ModelType
-        self.star_num = 50000
+        self.star_num = 100000
         self.bootstrap_iterations = 300
         self.size_error_ratio = 0.001
 
@@ -582,8 +582,8 @@ class ModelErrors():
             psfe1: e1 ellipticity for the PSF
             psfe2: e2 ellipticity for the PSF
         '''
-        stare1 = np.cos(2*rotDithers)/100
-        stare2 = np.sin(2*rotDithers)/100
+        stare1 = np.cos(2*rotDithers)/20
+        stare2 = np.sin(2*rotDithers)/20
         psfe1 = stare1/1.03
         psfe2 = stare2/1.03
         return stare1, stare2, psfe1, psfe2
