@@ -104,7 +104,7 @@ class ModelErrors():
         self.fwhm = 0.7  # arcsec
         self.sigma = self.fwhm/(2*np.sqrt(2*np.log(2)))
         self.TrM = 2*self.sigma**2
-        self.trace_ratio = 2.8933775060156068  # calculated in GalSize.ipynb
+        self.trace_ratio = 2.1  # calculated in GalSize.ipynb
         self.PSF.TrM = self.TrM
         self.STAR.TrM = self.TrM
         self.FOVradius = 1.75  # degrees
