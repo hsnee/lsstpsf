@@ -80,7 +80,8 @@ class ModelErrors():
 
     def __init__(self, ModelType, DitherPattern,
                  rotDithers, OpsimRun, objects_base,
-                 year, random_seed=1000):
+                 year, random_seed=1000,
+                 bootstrap_iterations=300):
         """Summary
 
         Args:
@@ -97,7 +98,10 @@ class ModelErrors():
             ValueError: if objects base not in {'Y10', 'actual'}
             FileNotFoundError: if file containing star positions is not found
         """
-        self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
+        if OpsimRun[0] != 'o':
+            self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
+        else:
+            self.runName = '/global/cscratch1/sd/neilsen/owsim_results/'+OpsimRun
         self.OpsimRun = OpsimRun
         self.random_seed = random.seed(random_seed)
         self.xipList = []
@@ -110,8 +114,8 @@ class ModelErrors():
         self.FOVradius = 1.75  # degrees
         self.alpha = 0.01
         self.ModelType = ModelType
-        self.star_num = 100000
-        self.bootstrap_iterations = 300
+        self.star_num = 1000
+        self.bootstrap_iterations = bootstrap_iterations
         self.size_error_ratio = 0.001
 
         if DitherPattern is 'alt_sched' \
@@ -227,7 +231,8 @@ class ModelErrors():
         print('getting the dither positions from the database: ',
               self.DitherPattern)
         print('using stackers:', self.Stacker)
-
+    
+        print('treating this as an '+self.Maker+' run')
         if self.Maker is not 'OpSim':
 
             opsdb = db.OpsimDatabase(self.runName+'.db')
@@ -278,6 +283,7 @@ class ModelErrors():
             metric = metrics.PassMetric()
             print('stacker is ', self.Stacker)
             if self.Stacker == [None]:
+                print(0)
                 myBundles['metric bundle'] = metricBundles.MetricBundle(
                     metric,
                     slicer,
@@ -285,6 +291,7 @@ class ModelErrors():
                     runName=self.runName,
                     metadata='running metric')
             else:
+                print(1)
                 myBundles['metric bundle'] = metricBundles.MetricBundle(
                     metric,
                     slicer,
@@ -341,7 +348,14 @@ class ModelErrors():
                Rotation: {}'.format(self.runName,
                                     self.DitherPattern,
                                     self.rotDitherPattern))
-
+        slicelen = int(len(slicer.slicePoint['ra'])/2)
+        ra = slicer.slicePoint['ra'][slicelen:]
+        dec = slicer.slicePoint['dec'][slicelen:]
+        self.stars = np.array((ra, dec)).swapaxes(1,0)
+        self.stars = np.array(random.choices(list(self.stars),
+                                     self.random_seed,
+                                     k=self.star_num))
+        
     def M2e(self):
         '''go back from 2nd moment space to elipticities
         '''
@@ -618,7 +632,8 @@ def getCounterAndDeltaXips(model,
                            OpsimRun,
                            rotDithers,
                            objects_base='Y10',
-                           random_seed=1000):
+                           random_seed=1000,
+                           bootstrap_iterations=300):
     """
     Args:
         model (str): 'radial' or 'horizontal'
@@ -657,20 +672,21 @@ def getCounterAndDeltaXips(model,
         filter = "i" and proposalId != '+str(proposalDict[OpsimRun])
     elif proposal_format == 'none':
         sqlWhere = 'night < '+str(nightsNum)+' and \
-        filter = "i"'
+        filter = "i" and proposalId = 3'
     else:
         raise ValueError('Cannot understand proposal_format')
     directory = 'newcutnpys/'
     outName = directory+OpsimRun+DitherPattern+str(rotDithers)+str(year)+'.npy'
 
-    print('analysing'+OpsimRun)
+    print('analysing '+OpsimRun)
     errors_object = ModelErrors(ModelType=model,
                                 DitherPattern=DitherPattern,
                                 OpsimRun=OpsimRun,
                                 rotDithers=rotDithers,
                                 year=year,
                                 objects_base=objects_base,
-                                random_seed=random_seed
+                                random_seed=random_seed,
+                                bootstrap_iterations=bootstrap_iterations
                                 )
     errors_object.process(sqlWhere)
     countersDict[OpsimRun] = errors_object.counter
