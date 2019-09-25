@@ -514,6 +514,7 @@ class ModelErrors():
 
         if self.rotDitherPattern is True:
             rotDithers = self.rotTelPos[cond]
+            rotDithers = np.array(rotDithers)*np.radians(1)
         else:
             pass
 
@@ -524,7 +525,7 @@ class ModelErrors():
                 )
 
         elif self.ModelType == 'horizontal':
-            stare1, stare2, psfe1, psfe2 = self.HorizontalModel(
+            stare1, stare2, psfe1, psfe2, theta = self.HorizontalModel(
                 star_pos=star_pos,
                 innerDithers=innerDithers,
                 rotDithers=rotDithers
@@ -608,7 +609,7 @@ class ModelErrors():
         stare2 = np.sin(2*rotDithers)/20
         psfe1 = stare1/1.03
         psfe2 = stare2/1.03
-        return stare1, stare2, psfe1, psfe2
+        return stare1, stare2, psfe1, psfe2, rotDithers
 
     def getRequirements(self):
         '''Getting requirements on rhos and xi_+ from HSC data.
@@ -753,7 +754,7 @@ def getKuiperTest(model,
     dstat = []
     for key in errors_object.savedStarsAngles.keys():
         setofangles = errors_object.savedStarsAngles[key]
-        if setofangles != []:
+        if len(setofangles) > 1:
             dstat.append(kuiper(setofangles*2+np.pi, stats.uniform.cdf, (0, 2*np.pi))[0])
     
     returnedList = []
