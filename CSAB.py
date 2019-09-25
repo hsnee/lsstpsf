@@ -10,7 +10,9 @@ import lsst.sims.maf.db as db
 import random
 from lsst.sims.utils import angularSeparation
 from itertools import groupby
-
+import healpy as hp
+from scipy import stats
+from astropy.stats import kuiper
 
 def arcm2r(theta):
     """adding this for consistency
@@ -101,7 +103,9 @@ class ModelErrors():
         if OpsimRun[0] != 'o':
             self.runName = '/global/cscratch1/sd/husni/OpsimRuns/'+OpsimRun
         else:
-            self.runName = '/global/cscratch1/sd/neilsen/owsim_results/'+OpsimRun
+                self.runName = '/global/cscratch1/sd/neilsen/owsim_results/'+OpsimRun
+                if not os.path.exists(self.runName):
+                    self.runName = '/global/cscratch1/sd/awan/dbs_post_wp/'+OpsimRun
         self.OpsimRun = OpsimRun
         self.random_seed = random.seed(random_seed)
         self.xipList = []
@@ -114,9 +118,11 @@ class ModelErrors():
         self.FOVradius = 1.75  # degrees
         self.alpha = 0.01
         self.ModelType = ModelType
-        self.star_num = 1000
+        self.star_num = 50000
         self.bootstrap_iterations = bootstrap_iterations
         self.size_error_ratio = 0.001
+        
+        self.savedStarsAngles = {}
 
         if DitherPattern is 'alt_sched' \
                 or DitherPattern is 'alt_sched_rolling' \
@@ -200,7 +206,6 @@ class ModelErrors():
         #         stackers.RandomRotDitherPerFilterChangeStacker()
         #         )
 
-        self.savedStarsAngles = {tuple(k): [] for k in self.stars}
         self.year = year
 
     class PSF:
@@ -348,13 +353,18 @@ class ModelErrors():
                Rotation: {}'.format(self.runName,
                                     self.DitherPattern,
                                     self.rotDitherPattern))
-        slicelen = int(len(slicer.slicePoint['ra'])/2)
-        ra = slicer.slicePoint['ra'][slicelen:]
-        dec = slicer.slicePoint['dec'][slicelen:]
+        
+        slicelen = int(len(slicer.slicePoints['ra'])/2)
+        ra = slicer.slicePoints['ra'][slicelen:]
+        dec = slicer.slicePoints['dec'][slicelen:]
         self.stars = np.array((ra, dec)).swapaxes(1,0)
         self.stars = np.array(random.choices(list(self.stars),
                                      self.random_seed,
                                      k=self.star_num))
+        
+        # bundle = myBundles['metric bundle']
+        # area = len(bundle.metricValues[cond])*hp.pixelfunc.nside2pixarea(nside=nside, degrees=True)
+        # print('the area of this survey is', area)
         
     def M2e(self):
         '''go back from 2nd moment space to elipticities
@@ -508,7 +518,7 @@ class ModelErrors():
             pass
 
         if self.ModelType == 'radial':
-            stare1, stare2, psfe1, psfe2 = self.RadialModel(
+            stare1, stare2, psfe1, psfe2, theta = self.RadialModel(
                 star_pos=star_pos,
                 innerDithers=innerDithers
                 )
@@ -527,10 +537,7 @@ class ModelErrors():
         psfMxx = 0.5*self.PSF.TrM*(psfe1+1)
         psfMxy = 0.5*self.PSF.TrM*psfe2
         psfMyy = 0.5*self.PSF.TrM*(-psfe1+1)
-        angles = np.array(
-            [r2d(0.5*np.arctan2(e2, e1)) for e2, e1 in zip(stare2, stare1)]
-            )
-        self.savedStarsAngles[star_pos] = angles
+        self.savedStarsAngles[star_pos] = theta
 
         deltaMxx = starMxx - psfMxx
         deltaMxy = starMxy - psfMxy
@@ -576,7 +583,8 @@ class ModelErrors():
         stare2 = r*np.sin(2*theta)
         psfe1 = stare1/1.06
         psfe2 = stare2/1.06
-        return stare1, stare2, psfe1, psfe2
+        theta = theta[r >= 0.01]
+        return stare1, stare2, psfe1, psfe2, np.array(theta)
 
     def HorizontalModel(self, star_pos, innerDithers, rotDithers):
         '''Summary
@@ -633,7 +641,8 @@ def getCounterAndDeltaXips(model,
                            rotDithers,
                            objects_base='Y10',
                            random_seed=1000,
-                           bootstrap_iterations=300):
+                           bootstrap_iterations=300,
+                           overwrite=True):
     """
     Args:
         model (str): 'radial' or 'horizontal'
@@ -647,16 +656,45 @@ def getCounterAndDeltaXips(model,
 
     Returns:
         dict: the distribution of visits per object
-
+        object: ModelErrors object after processing for data access
+        
     Raises:
         ValueError: if string args are not understood
     """
+    countersDict = {}
+    errors_object = runAnalysis(model=model,
+                        year=year,
+                        DitherPattern=DitherPattern,
+                        OpsimRun=OpsimRun,
+                        rotDithers=rotDithers,
+                        objects_base=objects_base,
+                        random_seed=random_seed,
+                        bootstrap_iterations=bootstrap_iterations,
+                       )
+    countersDict[OpsimRun] = errors_object.counter
+    directory = 'newcutnpys/'
+    outName = directory+OpsimRun+DitherPattern+str(rotDithers)+str(year)+'.npy'
+    if overwrite:
+        np.save(outName, errors_object.xipList)
+    print('there are now {} runs total for this strategy'.format(
+                                                len(np.load(outName))))
+    return countersDict, errors_object
+
+def runAnalysis(model, 
+                year, 
+                DitherPattern,
+                OpsimRun,
+                rotDithers,
+                objects_base,
+                random_seed,
+                bootstrap_iterations,
+                ):
     proposalDict = {'baseline2018a': 3, 'colossus_2664': 2, 'colossus_2665': 1,
                     'colossus_2667': 1, 'kraken_2026': 3, 'kraken_2035': 3,
                     'kraken_2036': 3, 'kraken_2042': 2, 'kraken_2044': 1,
                     'mothra_2045': 1, 'nexus_2097': 1, 'pontus_2002': 1,
                     'pontus_2489': 3, 'pontus_2502': 2, 'pontus_2579': 3}
-    countersDict = {}
+
     nightsNum = year*365
     if OpsimRun not in list(proposalDict.keys()):
         proposal_format = 'none'
@@ -675,8 +713,6 @@ def getCounterAndDeltaXips(model,
         filter = "i" and proposalId = 3'
     else:
         raise ValueError('Cannot understand proposal_format')
-    directory = 'newcutnpys/'
-    outName = directory+OpsimRun+DitherPattern+str(rotDithers)+str(year)+'.npy'
 
     print('analysing '+OpsimRun)
     errors_object = ModelErrors(ModelType=model,
@@ -689,12 +725,45 @@ def getCounterAndDeltaXips(model,
                                 bootstrap_iterations=bootstrap_iterations
                                 )
     errors_object.process(sqlWhere)
-    countersDict[OpsimRun] = errors_object.counter
-    np.save(outName, errors_object.xipList)
-    print('there are now {} runs total for this strategy'.format(
-                                                len(np.load(outName))))
-    return countersDict, errors_object
+    
+    return errors_object
 
+def getKuiperTest(model,
+                  year,
+                  DitherPattern,
+                  OpsimRun,
+                  rotDithers,
+                  objects_base,
+                  random_seed,
+                  bootstrap_iterations,
+                  returnFull=False, 
+                  returnStats=True
+                 ):
+                  
+    errors_object = runAnalysis(model=model,
+                                year=year,
+                                DitherPattern=DitherPattern,
+                                OpsimRun=OpsimRun,
+                                rotDithers=rotDithers,
+                                objects_base=objects_base,
+                                random_seed=random_seed,
+                                bootstrap_iterations=bootstrap_iterations,
+                               )
+
+    dstat = []
+    for key in errors_object.savedStarsAngles.keys():
+        setofangles = errors_object.savedStarsAngles[key]
+        if setofangles != []:
+            dstat.append(kuiper(setofangles*2+np.pi, stats.uniform.cdf, (0, 2*np.pi))[0])
+    
+    returnedList = []
+    if returnStats==True:
+        returnedList.append(np.mean(dstat))
+        returnedList.append(np.median(dstat))
+        returnedList.append(np.std(dstat))
+    if returnFull==True:
+        returnedList.append(dstat)
+    return returnedList
 
 def getPositions(runName, year):
     proposalDict = {'baseline2018a': 3, 'colossus_2664': 2, 'colossus_2665': 1,
