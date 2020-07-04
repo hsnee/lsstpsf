@@ -118,7 +118,7 @@ class ModelErrors():
         self.FOVradius = 1.75  # degrees
         self.alpha = 0.01
         self.ModelType = ModelType
-        self.star_num = 50000
+        self.star_num = 100000
         self.bootstrap_iterations = bootstrap_iterations
         self.size_error_ratio = 0.001
         
@@ -354,13 +354,7 @@ class ModelErrors():
                                     self.DitherPattern,
                                     self.rotDitherPattern))
         
-        slicelen = int(len(slicer.slicePoints['ra'])/2)
-        ra = slicer.slicePoints['ra'][slicelen:]
-        dec = slicer.slicePoints['dec'][slicelen:]
-        self.stars = np.array((ra, dec)).swapaxes(1,0)
-        self.stars = np.array(random.choices(list(self.stars),
-                                     self.random_seed,
-                                     k=self.star_num))
+
         
         # bundle = myBundles['metric bundle']
         # area = len(bundle.metricValues[cond])*hp.pixelfunc.nside2pixarea(nside=nside, degrees=True)
@@ -425,7 +419,7 @@ class ModelErrors():
 
         min_sep = 0.01  # in degrees
         max_sep = 10  # in degrees
-        nbins = 24  # number of bins
+        nbins = 26  # number of bins
 
         dedecorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
                                     nbins=nbins, sep_units='degrees')
@@ -444,29 +438,29 @@ class ModelErrors():
 
         self.rho2 = ede_xip
 
-        edtedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
-                                      nbins=nbins, sep_units='degrees')
-        edtedtcorr.process(psfcat, psfcat)
-        edtedt_xip = edtedtcorr.xip * self.size_error_ratio**2
-        edtedt_xim = edtedtcorr.xim * self.size_error_ratio**2
+        #edtedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
+        #                              nbins=nbins, sep_units='degrees')
+        #edtedtcorr.process(psfcat, psfcat)
+        #edtedt_xip = edtedtcorr.xip * self.size_error_ratio**2
+        #edtedt_xim = edtedtcorr.xim * self.size_error_ratio**2
 
-        self.rho3 = edtedt_xip
+        #self.rho3 = edtedt_xip
 
-        deedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
-                                     nbins=nbins, sep_units='degrees')
-        deedtcorr.process(decat, psfcat)
-        deedt_xip = deedtcorr.xip * self.size_error_ratio
-        deedt_xim = deedtcorr.xim * self.size_error_ratio
+        #deedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
+        #                             nbins=nbins, sep_units='degrees')
+        #deedtcorr.process(decat, psfcat)
+        #deedt_xip = deedtcorr.xip * self.size_error_ratio
+        #deedt_xim = deedtcorr.xim * self.size_error_ratio
 
-        self.rho4 = deedt_xip
+        #self.rho4 = deedt_xip
 
-        eedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
-                                    nbins=nbins, sep_units='degrees')
-        eedtcorr.process(psfcat, psfcat)
-        eedt_xip = eedtcorr.xip * self.size_error_ratio
-        eedt_xim = eedtcorr.xim * self.size_error_ratio
+        #eedtcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
+        #                            nbins=nbins, sep_units='degrees')
+        #eedtcorr.process(psfcat, psfcat)
+        #eedt_xip = eedtcorr.xip * self.size_error_ratio
+        #eedt_xim = eedtcorr.xim * self.size_error_ratio
 
-        self.rho5 = eedt_xip
+        #self.rho5 = eedt_xip
 
         # star shape correlation:
         starcorr = tr.GGCorrelation(min_sep=min_sep, max_sep=max_sep,
@@ -480,10 +474,10 @@ class ModelErrors():
 
         delta_xip = 2 * self.size_error_ratio*self.trace_ratio * self.xip\
             + (self.trace_ratio)**2 * self.rho1\
-            - self.alpha * (self.trace_ratio) * self.rho2\
-            + (self.trace_ratio)**2 * self.rho3\
-            + (self.trace_ratio)**2 * self.rho4\
-            - self.alpha * (self.trace_ratio) * self.rho5
+            - self.alpha * (self.trace_ratio) * self.rho2#\
+            #+ (self.trace_ratio)**2 * self.rho3\
+            #+ (self.trace_ratio)**2 * self.rho4\
+            #- self.alpha * (self.trace_ratio) * self.rho5
 
         self.xipList.append(delta_xip)
 
@@ -738,7 +732,8 @@ def getKuiperTest(model,
                   random_seed,
                   bootstrap_iterations,
                   returnFull=False, 
-                  returnStats=True
+                  returnStats=True,
+                  returnAngles=False
                  ):
                   
     errors_object = runAnalysis(model=model,
@@ -752,8 +747,12 @@ def getKuiperTest(model,
                                )
 
     dstat = []
+    if returnAngles==True:
+        totalsetsofangles = []
     for key in errors_object.savedStarsAngles.keys():
         setofangles = errors_object.savedStarsAngles[key]
+        if returnAngles==True:
+            totalsetsofangles.append(setofangles)
         if len(setofangles) > 1:
             dstat.append(kuiper(setofangles*2+np.pi, stats.uniform.cdf, (0, 2*np.pi))[0])
     
@@ -764,6 +763,9 @@ def getKuiperTest(model,
         returnedList.append(np.std(dstat))
     if returnFull==True:
         returnedList.append(dstat)
+    if returnAngles==True:
+        return returnedList, totalsetsofangles
+        
     return returnedList
 
 def getPositions(runName, year):
